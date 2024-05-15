@@ -14,25 +14,10 @@ import vn.hanguyen.tmdb.ui.theme.TMDBTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appContainer = (application as TmdbApplication).container
         setContent {
             val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-            TMDBApp(windowSizeClass)
+            TMDBApp(appContainer, windowSizeClass)
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TMDBTheme {
-        Greeting("Android")
     }
 }

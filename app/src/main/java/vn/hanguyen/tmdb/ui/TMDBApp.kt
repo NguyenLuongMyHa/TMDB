@@ -4,39 +4,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
-import kotlinx.coroutines.launch
+import vn.hanguyen.tmdb.data.movie.AppContainer
+import vn.hanguyen.tmdb.ui.home.HomeRoute
+import vn.hanguyen.tmdb.ui.home.HomeViewModel
 import vn.hanguyen.tmdb.ui.theme.TMDBTheme
 
 @Composable
-fun TMDBApp (widthSizeClass: WindowSizeClass) {
+fun TMDBApp(appContainer: AppContainer, widthSizeClass: WindowSizeClass) {
     TMDBTheme {
-        val navController = rememberNavController()
-        val navigationActions = remember(navController) {
-            TmdbNavigationActions(navController)
-        }
-
-        val coroutineScope = rememberCoroutineScope()
-
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute =
-            navBackStackEntry?.destination?.route ?: TmdbDestinations.HOME_ROUTE
-
         val isExpandedScreen = widthSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
 
-        TmdbNavGraph(
-            isExpandedScreen = isExpandedScreen,
-            navController = navController,
+        val homeViewModel: HomeViewModel = viewModel(
+            factory = HomeViewModel.provideFactory(
+                moviesRepository = appContainer.moviesRepository,
+            )
         )
-//                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    Greeting("Android")
-//                }
+        HomeRoute(
+            homeViewModel = homeViewModel,
+            isExpandedScreen = isExpandedScreen,
+        )
     }
 }
