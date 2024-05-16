@@ -25,6 +25,7 @@ fun HomeRoute(
         isExpandedScreen = isExpandedScreen,
         onSelectMovieItem = { homeViewModel.selectMovie(it) },
         onRefreshMovies = { homeViewModel.refreshTrendingMovies() },
+        onSearchMovie = { homeViewModel.searchMovies()},
         onSearchInputChanged = { homeViewModel.onSearchInputChanged(it) },
         onInteractWithList = { homeViewModel.interactedWithMovieList() },
         onInteractWithDetail = { homeViewModel.interactedWithMovieDetails(it) },
@@ -38,6 +39,7 @@ fun HomeRoute(
     onSelectMovieItem: (Long) -> Unit,
     onRefreshMovies: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
+    onSearchMovie: () -> Unit,
     onInteractWithList: () -> Unit,
     onInteractWithDetail: (Long) -> Unit,
 ) {
@@ -67,6 +69,7 @@ fun HomeRoute(
                 homeListLazyListState = homeListLazyListState,
                 movieDetailLazyListStates = movieDetailLazyListStates,
                 onSearchInputChanged = onSearchInputChanged,
+                onSearchMovie = onSearchMovie
             )
         }
 
@@ -78,6 +81,7 @@ fun HomeRoute(
                 onRefreshMovies = onRefreshMovies,
                 homeListLazyListState = homeListLazyListState,
                 onSearchInputChanged = onSearchInputChanged,
+                onSearchMovie = onSearchMovie
             )
         }
 

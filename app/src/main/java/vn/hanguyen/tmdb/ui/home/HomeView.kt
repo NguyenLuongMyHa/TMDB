@@ -87,6 +87,7 @@ fun HomeMovieListScreen(
     modifier: Modifier = Modifier,
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
+    onSearchMovie: () -> Unit,
 ) {
     HomeScreenWithList(
         uiState = uiState,
@@ -94,7 +95,8 @@ fun HomeMovieListScreen(
         onRefreshMovies = onRefreshMovies,
         modifier = modifier,
         searchInput = uiState.searchInput,
-        onSearchInputChanged = onSearchInputChanged
+        onSearchInputChanged = onSearchInputChanged,
+        onSearchMovie = onSearchMovie
     ) { hasPostsUiState, contentPadding, contentModifier ->
         MovieList(
             moviesList = hasPostsUiState.moviesList,
@@ -105,7 +107,8 @@ fun HomeMovieListScreen(
             modifier = contentModifier,
             state = homeListLazyListState,
             searchInput = searchInput,
-            onSearchInputChanged = onSearchInputChanged
+            onSearchInputChanged = onSearchInputChanged,
+            onSearchMovie = onSearchMovie
         )
     }
 }
@@ -119,6 +122,7 @@ private fun HomeScreenWithList(
     modifier: Modifier = Modifier,
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
+    onSearchMovie: () -> Unit,
     hasMoviesContent: @Composable (
         uiState: HomeUiState.HasMovies,
         contentPadding: PaddingValues,
@@ -134,6 +138,7 @@ private fun HomeScreenWithList(
                     Modifier.padding(16.dp),
                     searchInput = searchInput,
                     onSearchInputChanged = onSearchInputChanged,
+                    onSearchMovie = onSearchMovie
                 )
                 MovieItemsListDivider()
             }
@@ -258,6 +263,7 @@ private fun MovieList(
     state: LazyListState = rememberLazyListState(),
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
+    onSearchMovie : () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -270,6 +276,7 @@ private fun MovieList(
                     Modifier.padding(16.dp),
                     searchInput = searchInput,
                     onSearchInputChanged = onSearchInputChanged,
+                    onSearchMovie = onSearchMovie
                 )
             }
         }
@@ -290,6 +297,7 @@ private fun HomeSearch(
     modifier: Modifier = Modifier,
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
+    onSearchMovie: () -> Unit
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -303,7 +311,7 @@ private fun HomeSearch(
             .fillMaxWidth()
             .interceptKey(Key.Enter) {
                 // submit a search query when Enter is pressed
-                submitSearch(onSearchInputChanged, context)
+                onSearchMovie()
                 keyboardController?.hide()
                 focusManager.clearFocus(force = true)
             },
@@ -313,7 +321,7 @@ private fun HomeSearch(
         // keyboardActions submits the search query when the search key is pressed
         keyboardActions = KeyboardActions(
             onSearch = {
-                submitSearch(onSearchInputChanged, context)
+                onSearchMovie()
                 keyboardController?.hide()
                 focusManager.clearFocus(force = true)
             }
@@ -321,17 +329,6 @@ private fun HomeSearch(
     )
 }
 
-private fun submitSearch(
-    onSearchInputChanged: (String) -> Unit,
-    context: Context
-) {
-//    onSearchInputChanged("")
-    Toast.makeText(
-        context,
-        "Search is not yet implemented",
-        Toast.LENGTH_SHORT
-    ).show()
-}
 
 @Composable
 private fun MovieItemSection(
@@ -447,6 +444,7 @@ fun HomeListWithMovieDetailsScreen(
     modifier: Modifier = Modifier,
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
+    onSearchMovie: () -> Unit,
 ) {
     HomeScreenWithList(
         uiState = uiState,
@@ -454,7 +452,8 @@ fun HomeListWithMovieDetailsScreen(
         onRefreshMovies = onRefreshMovies,
         modifier = modifier,
         searchInput = searchInput,
-        onSearchInputChanged = onSearchInputChanged
+        onSearchInputChanged = onSearchInputChanged,
+        onSearchMovie = onSearchMovie
     ) { hasMoviesUiState, contentPadding, contentModifier ->
         Row(contentModifier) {
             MovieList(
@@ -469,6 +468,7 @@ fun HomeListWithMovieDetailsScreen(
                 state = homeListLazyListState,
                 searchInput = hasMoviesUiState.searchInput,
                 onSearchInputChanged = onSearchInputChanged,
+                onSearchMovie = onSearchMovie
             )
             // Crossfade between different detail posts
             Crossfade(targetState = hasMoviesUiState.selectedMovie) { detailMovie ->

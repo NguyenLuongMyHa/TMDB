@@ -35,7 +35,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -133,7 +132,9 @@ fun LazyListScope.movieContentItems(movie: Movie) {
             Spacer(androidx.compose.ui.Modifier.height(16.dp))
         }
     }
-    item { MovieProduction(movie.production, Modifier.padding(bottom = 24.dp)) }
+    if (movie.production != null) {
+        item { MovieProduction(movie.production, Modifier.padding(bottom = 24.dp)) }
+    }
 }
 
 

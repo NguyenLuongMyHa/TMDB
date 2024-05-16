@@ -7,7 +7,7 @@ data class Movie(
     val overview: String? = null,
     val posterUrl: String,
     val voteAverage: Float,
-    val production: MovieProduction
+    val production: MovieProduction? = null
 )
 
 data class MovieProduction(

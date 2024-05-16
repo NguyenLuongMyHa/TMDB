@@ -54,6 +54,33 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Search movies and update the UI state accordingly
+     */
+    fun searchMovies() {
+        viewModelState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            val result = moviesRepository.searchMovies(viewModelState.value.searchInput)
+            viewModelState.update {
+                when (result) {
+                    is Result.Success -> it.copy(
+                        moviesList = it.moviesList?.copy(searchResultMovies = result.data)
+                        , isLoading = false
+                    )
+
+                    is Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = Random.nextLong(),
+                            messageId = R.string.search_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Refresh movie and update the UI state accordingly
      */
     fun refreshTrendingMovies() {
@@ -66,7 +93,7 @@ class HomeViewModel @Inject constructor(
                 when (result) {
                     is Result.Success -> it.copy(
                         moviesList = MoviesList(
-                            trendingMovies = result.data.shuffled(),
+                            trendingMovies = result.data,
                             searchResultMovies = emptyList()
                         ), isLoading = false
                     )
