@@ -64,8 +64,9 @@ class HomeViewModel @Inject constructor(
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(
-                        moviesList = it.moviesList?.copy(searchResultMovies = result.data)
-                        , isLoading = false
+                        isShowSearchResult = true,
+                        moviesList = it.moviesList?.copy(searchResultMovies = result.data),
+                        isLoading = false
                     )
 
                     is Result.Error -> {
@@ -73,7 +74,10 @@ class HomeViewModel @Inject constructor(
                             id = Random.nextLong(),
                             messageId = R.string.search_error
                         )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        it.copy(
+                            isShowSearchResult = true,
+                            errorMessages = errorMessages, isLoading = false
+                        )
                     }
                 }
             }
@@ -92,6 +96,8 @@ class HomeViewModel @Inject constructor(
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(
+                        searchInput = "",
+                        isShowSearchResult = false,
                         moviesList = MoviesList(
                             trendingMovies = result.data,
                             searchResultMovies = emptyList()
@@ -103,7 +109,11 @@ class HomeViewModel @Inject constructor(
                             id = Random.nextLong(),
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        it.copy(
+                            searchInput = "",
+                            isShowSearchResult = false,
+                            errorMessages = errorMessages, isLoading = false
+                        )
                     }
                 }
             }

@@ -34,30 +34,37 @@ class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService)
 
     override suspend fun getTrendingMovies(): Result<List<Movie>> {
         return withContext(Dispatchers.IO) {
-            val result = service.getTrendingMovies()
-            if(result.results.isNotEmpty()) {
-                val resultMovieList = mutableListOf<Movie>()
-                result.results.forEach { movieResponse ->  resultMovieList.add(movieResponse.toMovie())}
-                trendingMoviesList.update { resultMovieList }
-                Result.Success(resultMovieList)
-            }
-            else {
+            try {
+                val result = service.getTrendingMovies()
+                if(result.results.isNotEmpty()) {
+                    val resultMovieList = mutableListOf<Movie>()
+                    result.results.forEach { movieResponse ->  resultMovieList.add(movieResponse.toMovie())}
+                    trendingMoviesList.update { resultMovieList }
+                    Result.Success(resultMovieList)
+                }
+                else {
+                    Result.Error(IllegalArgumentException("Movie not found"))
+                }
+            } catch (_: Exception) {
                 Result.Error(IllegalArgumentException("Movie not found"))
             }
-
         }
     }
 
     override suspend fun searchMovies(searchKey: String): Result<List<Movie>> {
         return withContext(Dispatchers.IO) {
-            val result = service.searchMovies(searchKey)
-            if(result.results.isNotEmpty()) {
-                val resultMovieList = mutableListOf<Movie>()
-                result.results.forEach { movieResponse ->  resultMovieList.add(movieResponse.toMovie())}
-                searchMoviesList.update { resultMovieList }
-                Result.Success(resultMovieList)
-            }
-            else {
+            try {
+                val result = service.searchMovies(searchKey)
+                if(result.results.isNotEmpty()) {
+                    val resultMovieList = mutableListOf<Movie>()
+                    result.results.forEach { movieResponse ->  resultMovieList.add(movieResponse.toMovie())}
+                    searchMoviesList.update { resultMovieList }
+                    Result.Success(resultMovieList)
+                }
+                else {
+                    Result.Error(IllegalArgumentException("Movie not found"))
+                }
+            } catch (_: Exception) {
                 Result.Error(IllegalArgumentException("Movie not found"))
             }
 

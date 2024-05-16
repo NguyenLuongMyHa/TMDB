@@ -1,6 +1,5 @@
 package vn.hanguyen.tmdb.ui.home
 
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -63,6 +62,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.currentCoroutineContext
@@ -71,6 +71,7 @@ import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.ui.detail.movieContentItems
 import vn.hanguyen.tmdb.ui.theme.Shapes
+import vn.hanguyen.tmdb.ui.theme.Typography
 import vn.hanguyen.tmdb.util.interceptKey
 
 
@@ -108,7 +109,8 @@ fun HomeMovieListScreen(
             state = homeListLazyListState,
             searchInput = searchInput,
             onSearchInputChanged = onSearchInputChanged,
-            onSearchMovie = onSearchMovie
+            onSearchMovie = onSearchMovie,
+            isSearchResult = hasPostsUiState.isSearchResult
         )
     }
 }
@@ -255,6 +257,7 @@ private fun FullScreenLoading() {
 @Composable
 private fun MovieList(
     moviesList: List<Movie>,
+    isSearchResult: Boolean,
     selectedItems: Set<Long>,
     showExpandedSearch: Boolean,
     onSelectMovie: (postId: Long) -> Unit,
@@ -263,7 +266,7 @@ private fun MovieList(
     state: LazyListState = rememberLazyListState(),
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
-    onSearchMovie : () -> Unit,
+    onSearchMovie: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -281,6 +284,17 @@ private fun MovieList(
             }
         }
         if (moviesList.isNotEmpty()) {
+            item {
+                val contentTypeText =
+                    if (isSearchResult) stringResource(id = R.string.search_result) else stringResource(
+                        id = R.string.trending
+                    )
+                Text(
+                    text = contentTypeText,
+                    style = Typography.titleLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
             item {
                 MovieItemSection(
                     moviesList,
@@ -392,7 +406,8 @@ fun MoviePosterImage(movie: Movie, modifier: Modifier = Modifier) {
             .clip(
                 Shapes.small
             ),
-        contentScale = ContentScale.Crop
+        contentScale = ContentScale.Crop,
+        failure = placeholder(R.drawable.ic_launcher_foreground)
     )
 
 }
@@ -468,7 +483,8 @@ fun HomeListWithMovieDetailsScreen(
                 state = homeListLazyListState,
                 searchInput = hasMoviesUiState.searchInput,
                 onSearchInputChanged = onSearchInputChanged,
-                onSearchMovie = onSearchMovie
+                onSearchMovie = onSearchMovie,
+                isSearchResult = hasMoviesUiState.isSearchResult
             )
             // Crossfade between different detail posts
             Crossfade(targetState = hasMoviesUiState.selectedMovie) { detailMovie ->

@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MovieProduction
@@ -149,7 +150,8 @@ private fun MovieProduction(
             model = production.imageUrl,
             contentDescription = "Poster image for the movie's production",
             modifier = Modifier.size(40.dp),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            failure = placeholder(R.drawable.ic_launcher_foreground)
         )
         Spacer(Modifier.width(8.dp))
         Column {
@@ -170,11 +172,7 @@ private fun MovieProduction(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun MoviePosterHeaderImage(movie: Movie) {
-    val imageModifier = Modifier
-        .heightIn(max = 180.dp)
-        .fillMaxWidth()
-        .clip(shape = Shapes.small)
-    val imageModifier2 =
+    val imageModifier =
         Modifier
             .aspectRatio(ratio = 4f / 3f)
             .fillMaxWidth()
@@ -182,8 +180,9 @@ private fun MoviePosterHeaderImage(movie: Movie) {
     GlideImage(
         model = movie.posterUrl,
         contentDescription = "Poster image for the movie ${movie.title}",
-        modifier = imageModifier2,
-        contentScale = ContentScale.FillBounds
+        modifier = imageModifier,
+        contentScale = ContentScale.FillBounds,
+        failure = placeholder(R.drawable.ic_launcher_foreground)
     )
 }
 
