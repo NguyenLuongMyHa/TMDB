@@ -1,8 +1,10 @@
 package vn.hanguyen.tmdb.ui.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -11,15 +13,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.data.movie.MoviesRepository
+import vn.hanguyen.tmdb.data.movie.MoviesRepositoryImpl
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage
 import kotlin.random.Random
 import vn.hanguyen.tmdb.util.Result
+import javax.inject.Inject
 
-class HomeViewModel(
-    private val moviesRepository: MoviesRepository,
-    preSelectedMovieId: Long?
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val moviesRepository: MoviesRepositoryImpl,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private var preSelectedMovieId: Long? = savedStateHandle["preSelectedMovieId"]
 
     private val viewModelState = MutableStateFlow(
         HomeViewModelState(
@@ -110,21 +117,6 @@ class HomeViewModel(
     fun onSearchInputChanged(searchInput: String) {
         viewModelState.update {
             it.copy(searchInput = searchInput)
-        }
-    }
-
-    /**
-     * Factory for HomeViewModel that takes MoviesRepository as a dependency
-     */
-    companion object {
-        fun provideFactory(
-            moviesRepository: MoviesRepository,
-            preSelectedMovieId: Long? = null
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(moviesRepository, preSelectedMovieId) as T
-            }
         }
     }
 }

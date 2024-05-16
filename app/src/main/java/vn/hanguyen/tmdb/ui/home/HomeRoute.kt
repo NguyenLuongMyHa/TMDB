@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import vn.hanguyen.tmdb.ui.detail.MovieDetailScreen
 import vn.hanguyen.tmdb.ui.home.HomeScreenType.ListMovie
@@ -13,7 +14,7 @@ import vn.hanguyen.tmdb.ui.home.HomeScreenType.MovieDetail
 
 @Composable
 fun HomeRoute(
-    homeViewModel: HomeViewModel,
+    homeViewModel: HomeViewModel = hiltViewModel(),
     isExpandedScreen: Boolean,
 ) {
     // UiState of the HomeScreen
@@ -55,7 +56,7 @@ fun HomeRoute(
 
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
     when (homeScreenType) {
-        HomeScreenType.ListWithMovieDetail -> {
+        ListWithMovieDetail -> {
             HomeListWithMovieDetailsScreen(
                 uiState = uiState,
                 showTopAppBar = !isExpandedScreen,
@@ -69,7 +70,7 @@ fun HomeRoute(
             )
         }
 
-        HomeScreenType.ListMovie -> {
+        ListMovie -> {
             HomeMovieListScreen(
                 uiState = uiState,
                 showTopAppBar = !isExpandedScreen,
@@ -80,7 +81,7 @@ fun HomeRoute(
             )
         }
 
-        HomeScreenType.MovieDetail -> {
+        MovieDetail -> {
             check(uiState is HomeUiState.HasMovies)
             MovieDetailScreen(
                 movie = uiState.selectedMovie,
@@ -124,16 +125,16 @@ private fun getHomeScreenType(
         when (uiState) {
             is HomeUiState.HasMovies -> {
                 if (uiState.isInMovieDetailPage) {
-                    HomeScreenType.MovieDetail
+                    MovieDetail
                 } else {
-                    HomeScreenType.ListMovie
+                    ListMovie
                 }
             }
 
-            is HomeUiState.NoMovies -> HomeScreenType.ListMovie
+            is HomeUiState.NoMovies -> ListMovie
         }
     }
 
-    true -> HomeScreenType.ListWithMovieDetail
+    true -> ListWithMovieDetail
 }
 
