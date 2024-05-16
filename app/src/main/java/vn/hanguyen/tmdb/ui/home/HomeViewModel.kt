@@ -2,7 +2,6 @@ package vn.hanguyen.tmdb.ui.home
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,13 +11,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import vn.hanguyen.tmdb.R
-import vn.hanguyen.tmdb.data.movie.MoviesRepository
 import vn.hanguyen.tmdb.data.movie.MoviesRepositoryImpl
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage
-import kotlin.random.Random
 import vn.hanguyen.tmdb.util.Result
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -66,7 +64,13 @@ class HomeViewModel @Inject constructor(
             val result = moviesRepository.getTrendingMovies()
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(moviesList = MoviesList(trendingMovies = result.data.shuffled(), searchResultMovies = emptyList()), isLoading = false)
+                    is Result.Success -> it.copy(
+                        moviesList = MoviesList(
+                            trendingMovies = result.data.shuffled(),
+                            searchResultMovies = emptyList()
+                        ), isLoading = false
+                    )
+
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = Random.nextLong(),
@@ -98,6 +102,7 @@ class HomeViewModel @Inject constructor(
             it.copy(isInMovieDetailPage = false)
         }
     }
+
     /**
      * Notify that the user interacted with the movie details
      */

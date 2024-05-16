@@ -92,7 +92,9 @@ fun HomeMovieListScreen(
         uiState = uiState,
         showTopAppBar = showTopAppBar,
         onRefreshMovies = onRefreshMovies,
-        modifier = modifier
+        modifier = modifier,
+        searchInput = uiState.searchInput,
+        onSearchInputChanged = onSearchInputChanged
     ) { hasPostsUiState, contentPadding, contentModifier ->
         MovieList(
             moviesList = hasPostsUiState.moviesList,
@@ -115,20 +117,25 @@ private fun HomeScreenWithList(
     showTopAppBar: Boolean,
     onRefreshMovies: () -> Unit,
     modifier: Modifier = Modifier,
+    searchInput: String = "",
+    onSearchInputChanged: (String) -> Unit,
     hasMoviesContent: @Composable (
         uiState: HomeUiState.HasMovies,
         contentPadding: PaddingValues,
         modifier: Modifier
-    ) -> Unit
+    ) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
     Scaffold(
         topBar = {
             if (showTopAppBar) {
-                HomeTopAppBar(
-                    topAppBarState = topAppBarState
+                HomeSearch(
+                    Modifier.padding(16.dp),
+                    searchInput = searchInput,
+                    onSearchInputChanged = onSearchInputChanged,
                 )
+                MovieItemsListDivider()
             }
         },
         modifier = modifier
@@ -260,7 +267,7 @@ private fun MovieList(
         if (showExpandedSearch) {
             item {
                 HomeSearch(
-                    Modifier.padding(horizontal = 16.dp),
+                    Modifier.padding(16.dp),
                     searchInput = searchInput,
                     onSearchInputChanged = onSearchInputChanged,
                 )
@@ -308,6 +315,7 @@ private fun HomeSearch(
             onSearch = {
                 submitSearch(onSearchInputChanged, context)
                 keyboardController?.hide()
+                focusManager.clearFocus(force = true)
             }
         )
     )
@@ -317,7 +325,7 @@ private fun submitSearch(
     onSearchInputChanged: (String) -> Unit,
     context: Context
 ) {
-    onSearchInputChanged("")
+//    onSearchInputChanged("")
     Toast.makeText(
         context,
         "Search is not yet implemented",
@@ -437,6 +445,7 @@ fun HomeListWithMovieDetailsScreen(
     homeListLazyListState: LazyListState,
     movieDetailLazyListStates: Map<Long, LazyListState>,
     modifier: Modifier = Modifier,
+    searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
 ) {
     HomeScreenWithList(
@@ -444,6 +453,8 @@ fun HomeListWithMovieDetailsScreen(
         showTopAppBar = showTopAppBar,
         onRefreshMovies = onRefreshMovies,
         modifier = modifier,
+        searchInput = searchInput,
+        onSearchInputChanged = onSearchInputChanged
     ) { hasMoviesUiState, contentPadding, contentModifier ->
         Row(contentModifier) {
             MovieList(
