@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     implementation(libs.retrofit2)
     implementation(libs.glide)
+    implementation(libs.androidx.paging.compose)
     testImplementation(libs.junit)
     kspAndroidTest(libs.hilt.android.compiler)
     androidTestImplementation(libs.androidx.junit)

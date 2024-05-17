@@ -27,11 +27,14 @@ import vn.hanguyen.tmdb.model.Movie
  */
 data class MovieResponse(
     @field:SerializedName("id") val id: Long,
-    @field:SerializedName("backdrop_path") val backdropPath: String,
+    @field:SerializedName("poster_path") val posterPath: String?,
     @field:SerializedName("title") val title: String,
     @field:SerializedName("release_date") val releaseDate: String,
     @field:SerializedName("vote_average") val voteAverage: Float,
     @field:SerializedName("overview") val overview: String,
 ) {
-    fun toMovie() : Movie = Movie(title = title, id = id, posterUrl = "https://image.tmdb.org/t/p/original"+ backdropPath, releaseYear = releaseDate, voteAverage = voteAverage, overview = overview, production = null)
+    fun toMovie() : Movie {
+        val poster = if (posterPath == null) null else "https://image.tmdb.org/t/p/original"+ posterPath
+        return Movie(title = title, id = id, posterUrl = poster, releaseYear = releaseDate, voteAverage = voteAverage, overview = overview, production = null)
+    }
 }

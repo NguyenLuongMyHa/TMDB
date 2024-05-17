@@ -1,5 +1,8 @@
 package vn.hanguyen.tmdb.ui.home
 
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
+import vn.hanguyen.tmdb.data.movie.MovieResponse
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage
@@ -27,9 +30,10 @@ sealed interface HomeUiState {
      */
     data class HasMovies(
         val moviesList: List<Movie>,
+        val moviesListPaging: Flow<PagingData<MovieResponse>>?,
         val isSearchResult: Boolean,
         val selectedMovie: Movie,
-        val selectedItems: Set<Long>,
+        val selectedMovieListId: Set<Long>,
         val isInMovieDetailPage: Boolean,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
@@ -39,10 +43,11 @@ sealed interface HomeUiState {
 
 data class HomeViewModelState(
     val moviesList: MoviesList? = null,
+    val searchMovieResultPagingData: Flow<PagingData<MovieResponse>>? = null,
     val isShowSearchResult: Boolean = false,
     val isInMovieDetailPage: Boolean = false,
     val selectedMovieId: Long? = null,
-    val selectedItems: Set<Long> = emptySet(),
+    val selectedMovieListId: Set<Long> = emptySet(),
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -70,8 +75,10 @@ data class HomeViewModelState(
                 // first movie in the list
                 selectedMovie = movieList.find {
                     it.id == selectedMovieId
-                } ?: movieList.first(),
-                selectedItems = selectedItems,
+                } ?: movieList.elementAtOrNull(0)
+                ?: moviesList.trendingMovies.first(),//TODO logic here
+                moviesListPaging = searchMovieResultPagingData,
+                selectedMovieListId = selectedMovieListId,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput

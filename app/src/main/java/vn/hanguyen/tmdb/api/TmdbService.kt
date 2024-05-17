@@ -24,7 +24,7 @@ interface TmdbService {
     @GET("search/movie")
     suspend fun searchMovies(
         @Query("query") query: String,
-//        @Query("page") page: Int,
+        @Query("page") page: Int,
         @Query("api_key") apiKey: String = BuildConfig.TMDB_ACCESS_KEY
     ): SearchResponse
 

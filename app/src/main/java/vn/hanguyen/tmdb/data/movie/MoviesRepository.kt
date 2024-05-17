@@ -1,5 +1,6 @@
 package vn.hanguyen.tmdb.data.movie
 
+import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.util.Result
@@ -17,8 +18,7 @@ interface MoviesRepository {
     /**
      * Search movies.
      */
-    suspend fun searchMovies(searchKey: String):  Result<List<Movie>>
-
+    fun getSearchResultStream(query: String): Flow<PagingData<MovieResponse>>
     /**
      * Observe the current selected movies
      */

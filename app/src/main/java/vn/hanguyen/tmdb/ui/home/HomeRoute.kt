@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.ui.detail.MovieDetailScreen
 import vn.hanguyen.tmdb.ui.home.HomeScreenType.ListMovie
 import vn.hanguyen.tmdb.ui.home.HomeScreenType.ListWithMovieDetail
@@ -25,10 +26,11 @@ fun HomeRoute(
         isExpandedScreen = isExpandedScreen,
         onSelectMovieItem = { homeViewModel.selectMovie(it) },
         onRefreshMovies = { homeViewModel.refreshTrendingMovies() },
-        onSearchMovie = { homeViewModel.searchMovies()},
+        onSearchMovie = { homeViewModel.searchMoviesWithPaging() },
         onSearchInputChanged = { homeViewModel.onSearchInputChanged(it) },
         onInteractWithList = { homeViewModel.interactedWithMovieList() },
         onInteractWithDetail = { homeViewModel.interactedWithMovieDetails(it) },
+        onAddMovieToCache = { homeViewModel.addMovieToSearchMemory(it) },
     )
 }
 
@@ -42,7 +44,8 @@ fun HomeRoute(
     onSearchMovie: () -> Unit,
     onInteractWithList: () -> Unit,
     onInteractWithDetail: (Long) -> Unit,
-) {
+    onAddMovieToCache: (movie: Movie) -> Unit,
+    ) {
     // Construct the lazy list states for the list and the details outside of deciding which one to
     // show. This allows the associated state to survive beyond that decision, and therefore
     // we get to preserve the scroll throughout any changes to the content.
@@ -69,19 +72,21 @@ fun HomeRoute(
                 homeListLazyListState = homeListLazyListState,
                 movieDetailLazyListStates = movieDetailLazyListStates,
                 onSearchInputChanged = onSearchInputChanged,
-                onSearchMovie = onSearchMovie
+                onSearchMovie = onSearchMovie,
+                onAddMovieToCache = onAddMovieToCache
             )
         }
 
         ListMovie -> {
-            HomeMovieListScreen(
+            HomeScreen(
                 uiState = uiState,
                 showTopAppBar = !isExpandedScreen,
                 onSelectMovie = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
                 homeListLazyListState = homeListLazyListState,
                 onSearchInputChanged = onSearchInputChanged,
-                onSearchMovie = onSearchMovie
+                onSearchMovie = onSearchMovie,
+                onAddMovieToCache = onAddMovieToCache
             )
         }
 

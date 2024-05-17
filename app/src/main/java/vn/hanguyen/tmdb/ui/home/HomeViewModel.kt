@@ -3,15 +3,21 @@ package vn.hanguyen.tmdb.ui.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.data.movie.MoviesRepositoryImpl
+import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage
 import vn.hanguyen.tmdb.util.Result
@@ -48,7 +54,7 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             moviesRepository.observeSelectedMovies().collect { selectedItems ->
-                viewModelState.update { it.copy(selectedItems = selectedItems) }
+                viewModelState.update { it.copy(selectedMovieListId = selectedItems) }
             }
         }
     }
@@ -56,29 +62,35 @@ class HomeViewModel @Inject constructor(
     /**
      * Search movies and update the UI state accordingly
      */
-    fun searchMovies() {
+    fun searchMoviesWithPaging() {
         viewModelState.update { it.copy(isLoading = true) }
 
+        val searchKey = viewModelState.value.searchInput
         viewModelScope.launch {
-            val result = moviesRepository.searchMovies(viewModelState.value.searchInput)
-            viewModelState.update {
-                when (result) {
-                    is Result.Success -> it.copy(
+            try {
+                val resultPagingData =
+                    moviesRepository.getSearchResultStream(searchKey).cachedIn(viewModelScope)
+                        .first()
+
+                viewModelState.update {
+                    it.copy(
                         isShowSearchResult = true,
-                        moviesList = it.moviesList?.copy(searchResultMovies = result.data),
+                        searchMovieResultPagingData = flowOf(resultPagingData),
+                        isLoading = false,
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                val errorMessages = ErrorMessage(
+                    id = Random.nextLong(),
+                    messageId = R.string.search_error
+                )
+                viewModelState.update {
+                    it.copy(
+                        isShowSearchResult = true,
+                        errorMessages = listOf(errorMessages),
                         isLoading = false
                     )
-
-                    is Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = Random.nextLong(),
-                            messageId = R.string.search_error
-                        )
-                        it.copy(
-                            isShowSearchResult = true,
-                            errorMessages = errorMessages, isLoading = false
-                        )
-                    }
                 }
             }
         }
@@ -129,6 +141,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             moviesRepository.selectMovie(movieId)
         }
+        viewModelState.update {
+            it.copy(selectedMovieId = movieId)
+        }
     }
 
     /**
@@ -148,7 +163,7 @@ class HomeViewModel @Inject constructor(
             it.copy(
                 selectedMovieId = movieId,
                 isInMovieDetailPage = true,
-                selectedItems = it.selectedItems.plus(movieId)
+                selectedMovieListId = it.selectedMovieListId.plus(movieId)
             )
         }
     }
@@ -159,6 +174,19 @@ class HomeViewModel @Inject constructor(
     fun onSearchInputChanged(searchInput: String) {
         viewModelState.update {
             it.copy(searchInput = searchInput)
+        }
+    }
+
+    fun addMovieToSearchMemory(movie: Movie) {
+        viewModelState.update {
+            it.copy(
+                moviesList = MoviesList(
+                    searchResultMovies = it.moviesList?.searchResultMovies?.plus(
+                        movie
+                    ) ?: listOf(movie),
+                    trendingMovies = it.moviesList?.trendingMovies ?: emptyList()
+                )
+            )
         }
     }
 }
