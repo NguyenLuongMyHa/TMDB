@@ -108,6 +108,7 @@ fun HomeScreen(
             selectedItems = hasPostsUiState.selectedMovieListId,
             onAddMovieToCache = onAddMovieToCache,
             onSelectMovie = onSelectMovie,
+            contentPadding = contentPadding,
             modifier = contentModifier,
             state = homeListLazyListState,
             isSearchResult = hasPostsUiState.isSearchResult
@@ -198,13 +199,13 @@ private fun LoadingContent(
     if (empty) {
         emptyContent()
     } else {
-        Box(Modifier.fillMaxSize().zIndex(-1f)) {
+//        Box(Modifier.fillMaxSize().zIndex(-1f)) {
             SwipeRefresh(
                 state = rememberSwipeRefreshState(loading),
                 onRefresh = onRefresh,
                 content = content,
             )
-        }
+//        }
 
     }
 }
@@ -228,11 +229,12 @@ private fun MovieList(
     selectedItems: Set<Long>,
     onSelectMovie: (postId: Long) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(contentPadding),
     ) {
         if (moviesListPaging != null && isSearchResult) {
             val contentTypeText =
@@ -465,7 +467,8 @@ fun HomeListWithMovieDetailsScreen(
                 moviesListPaging = hasMoviesUiState.moviesListPaging,
                 selectedItems = hasMoviesUiState.selectedMovieListId,
                 onSelectMovie = onSelectMovieItem,
-                modifier = Modifier
+                contentPadding = contentPadding,
+                modifier = contentModifier
                     .width(334.dp)
                     .notifyInput(onInteractWithList),
                 state = homeListLazyListState,
@@ -473,8 +476,7 @@ fun HomeListWithMovieDetailsScreen(
                 isSearchResult = hasMoviesUiState.isSearchResult
             )
             // Crossfade between different detail posts
-            if(hasMoviesUiState.selectedMovie!= null)
-            Crossfade(targetState = hasMoviesUiState.selectedMovie) { detailMovie ->
+            Crossfade(modifier = contentModifier.padding(contentPadding), targetState = hasMoviesUiState.selectedMovie) { detailMovie ->
                 // Get the lazy list state for this detail view
                 val detailLazyListState by remember {
                     derivedStateOf {
