@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -55,7 +60,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -92,7 +96,7 @@ fun HomeScreen(
     onSearchInputChanged: (String) -> Unit,
     onSearchMovie: () -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
-    ) {
+) {
     HomeScreenWithList(
         uiState = uiState,
         showTopAppBar = showTopAppBar,
@@ -111,6 +115,45 @@ fun HomeScreen(
             contentPadding = contentPadding,
             modifier = contentModifier,
             state = homeListLazyListState,
+            isSearchResult = hasPostsUiState.isSearchResult
+        )
+    }
+}
+
+/**
+ * The home screen displaying the movie list in tablet vertical.
+ */
+@Composable
+fun HomeGridScreen(
+    uiState: HomeUiState,
+    showTopAppBar: Boolean,
+    onSelectMovie: (Long) -> Unit,
+    onRefreshMovies: () -> Unit,
+    homeListLazyGridState: LazyGridState,
+    modifier: Modifier = Modifier,
+    searchInput: String = "",
+    onSearchInputChanged: (String) -> Unit,
+    onSearchMovie: () -> Unit,
+    onAddMovieToCache: (movie: Movie) -> Unit,
+) {
+    HomeScreenWithList(
+        uiState = uiState,
+        showTopAppBar = showTopAppBar,
+        onRefreshMovies = onRefreshMovies,
+        modifier = modifier,
+        searchInput = uiState.searchInput,
+        onSearchInputChanged = onSearchInputChanged,
+        onSearchMovie = onSearchMovie
+    ) { hasPostsUiState, contentPadding, contentModifier ->
+        MovieListGrid(
+            moviesList = hasPostsUiState.moviesList,
+            moviesListPaging = hasPostsUiState.moviesListPaging,
+            selectedItems = hasPostsUiState.selectedMovieListId,
+            onAddMovieToCache = onAddMovieToCache,
+            onSelectMovie = onSelectMovie,
+            contentPadding = contentPadding,
+            modifier = contentModifier,
+            stateGrid = homeListLazyGridState,
             isSearchResult = hasPostsUiState.isSearchResult
         )
     }
@@ -200,11 +243,11 @@ private fun LoadingContent(
         emptyContent()
     } else {
 //        Box(Modifier.fillMaxSize().zIndex(-1f)) {
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(loading),
-                onRefresh = onRefresh,
-                content = content,
-            )
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(loading),
+            onRefresh = onRefresh,
+            content = content,
+        )
 //        }
 
     }
@@ -218,6 +261,77 @@ private fun FullScreenLoading() {
             .wrapContentSize(Alignment.Center)
     ) {
         CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun MovieListGrid(
+    moviesList: List<Movie>,
+    moviesListPaging: Flow<PagingData<MovieResponse>>?,
+    isSearchResult: Boolean,
+    selectedItems: Set<Long>,
+    onSelectMovie: (postId: Long) -> Unit,
+    onAddMovieToCache: (movie: Movie) -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    modifier: Modifier = Modifier,
+    stateGrid: LazyGridState = rememberLazyGridState(),
+) {
+    Column(
+        modifier = modifier.padding(contentPadding),
+    ) {
+        if (moviesListPaging != null && isSearchResult) {
+            val contentTypeText =
+                if (isSearchResult) stringResource(id = R.string.search_result) else stringResource(
+                    id = R.string.trending
+                )
+            Text(
+                text = contentTypeText,
+                style = Typography.titleLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            val pagingItems: LazyPagingItems<MovieResponse> =
+                moviesListPaging.collectAsLazyPagingItems()
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(all = 12.dp),
+                state = stateGrid
+            ) {
+                items(
+                    count = pagingItems.itemCount,
+                    key = pagingItems.itemKey { it.id }
+                ) { index ->
+                    val movie = pagingItems[index] ?: return@items
+                    onAddMovieToCache(movie.toMovie())
+                    MovieCardItem(
+                        movie = movie.toMovie(),
+                        isSelected = selectedItems.contains(movie.id),
+                        onSelectMovie = { onSelectMovie(movie.id) }
+                    )
+                }
+            }
+        } else {
+            Column(
+                modifier = modifier,
+            ) {
+                if (moviesList.isNotEmpty()) {
+                    val contentTypeText =
+                        if (isSearchResult) stringResource(id = R.string.search_result) else stringResource(
+                            id = R.string.trending
+                        )
+                    Text(
+                        text = contentTypeText,
+                        style = Typography.titleLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    MovieItemSectionGrid(
+                        moviesList,
+                        selectedItems,
+                        onSelectMovie,
+                    )
+
+                }
+            }
+        }
     }
 }
 
@@ -254,7 +368,7 @@ private fun MovieList(
             ) {
                 items(
                     count = pagingItems.itemCount,
-                      key = pagingItems.itemKey { it.id }
+                    key = pagingItems.itemKey { it.id }
                 ) { index ->
                     val movie = pagingItems[index] ?: return@items
                     onAddMovieToCache(movie.toMovie())
@@ -265,8 +379,7 @@ private fun MovieList(
                     )
                 }
             }
-        }
-        else {
+        } else {
             LazyColumn(
                 modifier = modifier,
                 state = state
@@ -335,6 +448,29 @@ private fun HomeSearch(
 
 
 @Composable
+private fun MovieItemSectionGrid(
+    movies: List<Movie>,
+    selectedMovies: Set<Long>,
+    onSelectMovie: (Long) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(all = 12.dp)
+    ) {
+        items(
+            count = movies.size,
+            key = { it }
+        ) { index ->
+            MovieCardItemGrid(
+                movie = movies[index],
+                isSelected = selectedMovies.contains(movies[index].id),
+                onSelectMovie = { onSelectMovie(movies[index].id) }
+            )
+        }
+    }
+}
+
+@Composable
 private fun MovieItemSection(
     movies: List<Movie>,
     selectedMovies: Set<Long>,
@@ -385,6 +521,24 @@ fun MovieCardItem(
     }
 }
 
+@Composable
+fun MovieCardItemGrid(
+    movie: Movie,
+    onSelectMovie: (Long) -> Unit,
+    isSelected: Boolean,
+) {
+    Column(
+        modifier = Modifier
+            .clickable(onClick = {
+                onSelectMovie(movie.id)
+            })
+    ) {
+        MoviePosterImageGrid(movie, Modifier.padding(16.dp))
+        MovieTitle(movie, isSelected, Modifier.padding(horizontal = 16.dp))
+        YearAndVoteAverage(movie, Modifier.padding(horizontal = 16.dp))
+    }
+}
+
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MoviePosterImage(movie: Movie, modifier: Modifier = Modifier) {
@@ -402,8 +556,26 @@ fun MoviePosterImage(movie: Movie, modifier: Modifier = Modifier) {
 
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MovieTitle(movie: Movie, isSelected: Boolean) {
+fun MoviePosterImageGrid(movie: Movie, modifier: Modifier = Modifier) {
+    GlideImage(
+        model = movie.posterUrl,
+        contentDescription = "Poster image for the movie ${movie.title}",
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(3f / 4f)
+            .clip(
+                Shapes.small
+            ),
+        contentScale = ContentScale.Crop,
+        failure = placeholder(R.drawable.ic_launcher_foreground)
+    )
+
+}
+
+@Composable
+fun MovieTitle(movie: Movie, isSelected: Boolean, modifier: Modifier = Modifier) {
     val style = if (isSelected) {
         MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.Underline)
     } else MaterialTheme.typography.titleMedium
@@ -412,6 +584,7 @@ fun MovieTitle(movie: Movie, isSelected: Boolean) {
         style = style,
         maxLines = 3,
         overflow = TextOverflow.Ellipsis,
+        modifier = modifier
     )
 }
 
@@ -451,7 +624,7 @@ fun HomeListWithMovieDetailsScreen(
     onSearchInputChanged: (String) -> Unit,
     onSearchMovie: () -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
-    ) {
+) {
     HomeScreenWithList(
         uiState = uiState,
         showTopAppBar = showTopAppBar,
@@ -476,7 +649,10 @@ fun HomeListWithMovieDetailsScreen(
                 isSearchResult = hasMoviesUiState.isSearchResult
             )
             // Crossfade between different detail posts
-            Crossfade(modifier = contentModifier.padding(contentPadding), targetState = hasMoviesUiState.selectedMovie) { detailMovie ->
+            Crossfade(
+                modifier = contentModifier.padding(contentPadding),
+                targetState = hasMoviesUiState.selectedMovie
+            ) { detailMovie ->
                 // Get the lazy list state for this detail view
                 val detailLazyListState by remember {
                     derivedStateOf {

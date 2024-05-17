@@ -1,6 +1,7 @@
 package vn.hanguyen.tmdb.ui.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,20 +11,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.ui.detail.MovieDetailScreen
 import vn.hanguyen.tmdb.ui.home.HomeScreenType.ListMovie
+import vn.hanguyen.tmdb.ui.home.HomeScreenType.GridMovie
 import vn.hanguyen.tmdb.ui.home.HomeScreenType.ListWithMovieDetail
 import vn.hanguyen.tmdb.ui.home.HomeScreenType.MovieDetail
 
 @Composable
 fun HomeRoute(
     homeViewModel: HomeViewModel = hiltViewModel(),
-    isExpandedScreen: Boolean,
+    isExpandedScreenInWidth: Boolean,
+    isExpandedScreenInHeight: Boolean,
 ) {
     // UiState of the HomeScreen
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
     HomeRoute(
         uiState = uiState,
-        isExpandedScreen = isExpandedScreen,
+        isExpandedScreenInWidth = isExpandedScreenInWidth,
+        isExpandedScreenInHeight = isExpandedScreenInHeight,
         onSelectMovieItem = { homeViewModel.selectMovie(it) },
         onRefreshMovies = { homeViewModel.refreshTrendingMovies() },
         onSearchMovie = { homeViewModel.searchMoviesWithPaging() },
@@ -37,7 +41,8 @@ fun HomeRoute(
 @Composable
 fun HomeRoute(
     uiState: HomeUiState,
-    isExpandedScreen: Boolean,
+    isExpandedScreenInWidth: Boolean,
+    isExpandedScreenInHeight: Boolean,
     onSelectMovieItem: (Long) -> Unit,
     onRefreshMovies: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
@@ -50,6 +55,7 @@ fun HomeRoute(
     // show. This allows the associated state to survive beyond that decision, and therefore
     // we get to preserve the scroll throughout any changes to the content.
     val homeListLazyListState = rememberLazyListState()
+    val homeListLazyGridState = rememberLazyGridState()
     val movieDetailLazyListStates = when (uiState) {
         is HomeUiState.HasMovies -> uiState.moviesList
         is HomeUiState.NoMovies -> emptyList()
@@ -59,12 +65,12 @@ fun HomeRoute(
         }
     }
 
-    val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
+    val homeScreenType = getHomeScreenType(isExpandedScreenInWidth, isExpandedScreenInHeight, uiState)
     when (homeScreenType) {
         ListWithMovieDetail -> {
             HomeListWithMovieDetailsScreen(
                 uiState = uiState,
-                showTopAppBar = !isExpandedScreen,
+                showTopAppBar = !isExpandedScreenInWidth,
                 onSelectMovieItem = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
                 onInteractWithList = onInteractWithList,
@@ -77,10 +83,22 @@ fun HomeRoute(
             )
         }
 
+        GridMovie -> {
+            HomeGridScreen(
+                uiState = uiState,
+                showTopAppBar = !isExpandedScreenInWidth,
+                onSelectMovie = onSelectMovieItem,
+                onRefreshMovies = onRefreshMovies,
+                homeListLazyGridState = homeListLazyGridState,
+                onSearchInputChanged = onSearchInputChanged,
+                onSearchMovie = onSearchMovie,
+                onAddMovieToCache = onAddMovieToCache
+            )
+        }
         ListMovie -> {
             HomeScreen(
                 uiState = uiState,
-                showTopAppBar = !isExpandedScreen,
+                showTopAppBar = !isExpandedScreenInWidth,
                 onSelectMovie = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
                 homeListLazyListState = homeListLazyListState,
@@ -94,7 +112,7 @@ fun HomeRoute(
             check(uiState is HomeUiState.HasMovies)
             MovieDetailScreen(
                 movie = uiState.selectedMovie,
-                isExpandedScreen = isExpandedScreen,
+                isExpandedScreen = isExpandedScreenInWidth,
                 onBack = onInteractWithList,
                 lazyListState = movieDetailLazyListStates.getValue(
                     uiState.selectedMovie.id
@@ -122,28 +140,46 @@ fun HomeRoute(
 private enum class HomeScreenType {
     ListWithMovieDetail,
     ListMovie,
+    GridMovie,
     MovieDetail
 }
 
 @Composable
 private fun getHomeScreenType(
-    isExpandedScreen: Boolean,
+    isExpandedScreenInWidth: Boolean,
+    isExpandedScreenInHeight: Boolean,
     uiState: HomeUiState
-): HomeScreenType = when (isExpandedScreen) {
-    false -> {
-        when (uiState) {
-            is HomeUiState.HasMovies -> {
-                if (uiState.isInMovieDetailPage) {
-                    MovieDetail
-                } else {
-                    ListMovie
+): HomeScreenType {
+    when (isExpandedScreenInWidth) {
+        false -> {
+            when (isExpandedScreenInHeight) {
+                false -> {
+                    return when (uiState) {
+                        is HomeUiState.HasMovies -> {
+                            if (uiState.isInMovieDetailPage) {
+                                MovieDetail
+                            } else {
+                                ListMovie
+                            }
+                        }
+
+                        is HomeUiState.NoMovies -> ListMovie
+                    }
+                }
+                true -> return when (uiState) {
+                    is HomeUiState.HasMovies -> {
+                        if (uiState.isInMovieDetailPage) {
+                            MovieDetail
+                        } else {
+                            GridMovie
+                        }
+                    }
+
+                    is HomeUiState.NoMovies -> GridMovie
                 }
             }
-
-            is HomeUiState.NoMovies -> ListMovie
         }
+        true -> return ListWithMovieDetail
     }
-
-    true -> ListWithMovieDetail
 }
 
