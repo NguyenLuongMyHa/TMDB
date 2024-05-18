@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import vn.hanguyen.tmdb.R
-import vn.hanguyen.tmdb.data.movie.MoviesRepositoryImpl
+import vn.hanguyen.tmdb.data.MoviesRepositoryImpl
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage

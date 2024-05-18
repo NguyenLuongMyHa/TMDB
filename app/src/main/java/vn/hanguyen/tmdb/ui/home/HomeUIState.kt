@@ -2,7 +2,7 @@ package vn.hanguyen.tmdb.ui.home
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import vn.hanguyen.tmdb.data.movie.MovieResponse
+import vn.hanguyen.tmdb.data.remote.MovieResponse
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage

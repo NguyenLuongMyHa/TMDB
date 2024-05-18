@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.hilt.android)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.gson)
     implementation(libs.okhttp3.logging.interceptor)

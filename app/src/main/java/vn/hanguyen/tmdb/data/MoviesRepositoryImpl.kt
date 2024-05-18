@@ -1,4 +1,4 @@
-package vn.hanguyen.tmdb.data.movie
+package vn.hanguyen.tmdb.data
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -11,11 +11,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import vn.hanguyen.tmdb.api.TmdbService
+import vn.hanguyen.tmdb.data.remote.MoviePagingSource
+import vn.hanguyen.tmdb.data.remote.MovieResponse
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.util.Result
 import javax.inject.Inject
 
-class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService) : MoviesRepository {
+class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService) :
+    MoviesRepository {
     // for now, store these in memory, later, using Room
     private val selectedMovies = MutableStateFlow<Set<Int>>(setOf())
     private val trendingMoviesList = MutableStateFlow<List<Movie>?>(null)

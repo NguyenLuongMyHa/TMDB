@@ -1,4 +1,4 @@
-package vn.hanguyen.tmdb.data.movie
+package vn.hanguyen.tmdb.data.remote
 
 import com.google.gson.annotations.SerializedName
 import vn.hanguyen.tmdb.model.Movie

@@ -1,4 +1,4 @@
-package vn.hanguyen.tmdb.data.movie
+package vn.hanguyen.tmdb.data.remote
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

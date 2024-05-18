@@ -9,8 +9,8 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import vn.hanguyen.tmdb.BuildConfig
-import vn.hanguyen.tmdb.data.movie.MovieListResponse
-import vn.hanguyen.tmdb.data.movie.MovieResponse
+import vn.hanguyen.tmdb.data.remote.MovieListResponse
+import vn.hanguyen.tmdb.data.remote.MovieResponse
 
 /**
  * Connect to the Moviedb API to fetch movies

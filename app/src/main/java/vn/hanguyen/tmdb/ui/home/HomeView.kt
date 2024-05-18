@@ -73,7 +73,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.isActive
 import vn.hanguyen.tmdb.R
-import vn.hanguyen.tmdb.data.movie.MovieResponse
+import vn.hanguyen.tmdb.data.remote.MovieResponse
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.ui.detail.movieContentItems
 import vn.hanguyen.tmdb.ui.theme.Shapes
