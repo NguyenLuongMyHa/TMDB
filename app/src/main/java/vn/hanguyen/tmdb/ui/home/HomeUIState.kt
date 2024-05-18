@@ -2,6 +2,7 @@ package vn.hanguyen.tmdb.ui.home
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import vn.hanguyen.tmdb.data.local.MovieEntity
 import vn.hanguyen.tmdb.data.remote.MovieResponse
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MoviesList
@@ -29,10 +30,10 @@ sealed interface HomeUiState {
      * There are movies to render
      */
     data class HasMovies(
-        val moviesList: List<Movie>,
         val moviesListPaging: Flow<PagingData<MovieResponse>>?,
+        val trendingMoviesListPaging: Flow<PagingData<MovieEntity>>?,
         val isSearchResult: Boolean,
-        val selectedMovie: Movie,
+        val selectedMovie: Movie?,
         val selectedMovieListId: Set<Int>,
         val isInMovieDetailPage: Boolean,
         override val isLoading: Boolean,
@@ -42,8 +43,9 @@ sealed interface HomeUiState {
 }
 
 data class HomeViewModelState(
-    val moviesList: MoviesList? = null,
+    val moviesList: MoviesList,
     val searchMovieResultPagingData: Flow<PagingData<MovieResponse>>? = null,
+    val trendingMovieResultPagingData: Flow<PagingData<MovieEntity>>? = null,
     val isShowSearchResult: Boolean = false,
     val isInMovieDetailPage: Boolean = false,
     val selectedMovieId: Int? = null,
@@ -57,17 +59,15 @@ data class HomeViewModelState(
      * Convert [HomeViewModelState] into [HomeUiState] for the ui.
      */
     fun toUiState(): HomeUiState =
-        if (moviesList?.searchResultMovies == null && moviesList?.trendingMovies == null) {
+        if (moviesList.movies.isEmpty() && searchMovieResultPagingData == null && trendingMovieResultPagingData == null) {
             HomeUiState.NoMovies(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
             )
         } else {
-            val movieList =
-                if (isShowSearchResult) moviesList.searchResultMovies else moviesList.trendingMovies
+            val movieList = moviesList.movies
             HomeUiState.HasMovies(
-                moviesList = movieList,
                 isSearchResult = isShowSearchResult,
                 isInMovieDetailPage = isInMovieDetailPage,
                 // Determine the selected movie. This will be the movie the user last selected.
@@ -75,9 +75,9 @@ data class HomeViewModelState(
                 // first movie in the list
                 selectedMovie = movieList.find {
                     it.id == selectedMovieId
-                } ?: movieList.elementAtOrNull(0)
-                ?: moviesList.trendingMovies.first(),//TODO logic here
+                } ?: movieList.elementAtOrNull(0),//TODO make sure always have a selected movie here
                 moviesListPaging = searchMovieResultPagingData,
+                trendingMoviesListPaging = trendingMovieResultPagingData,
                 selectedMovieListId = selectedMovieListId,
                 isLoading = isLoading,
                 errorMessages = errorMessages,

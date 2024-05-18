@@ -1,14 +1,10 @@
 package vn.hanguyen.tmdb.model
 
 class MoviesList(
-    var trendingMovies: MutableList<Movie>,
-    var searchResultMovies: MutableList<Movie>,
+    var movies: MutableList<Movie>,
 ) {
     fun updateMovieDetail(movie: Movie) : MoviesList {
-        trendingMovies.mapInPlace {
-            if (it.id == movie.id) movie else it
-        }
-        searchResultMovies.mapInPlace {
+        movies.mapInPlace {
             if (it.id == movie.id) movie else it
         }
         return this

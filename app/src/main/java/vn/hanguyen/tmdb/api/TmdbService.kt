@@ -10,6 +10,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import vn.hanguyen.tmdb.BuildConfig
 import vn.hanguyen.tmdb.data.remote.MovieListResponse
+import vn.hanguyen.tmdb.data.remote.MovieListResponse2
 import vn.hanguyen.tmdb.data.remote.MovieResponse
 
 /**
@@ -22,6 +23,11 @@ interface TmdbService {
 //        @Query("page") page: Int,
         @Query("api_key") apiKey: String = BuildConfig.TMDB_ACCESS_KEY
     ): MovieListResponse
+    @GET("trending/movie/day")
+    suspend fun getTrendingMovies2(
+        @Query("page") page: Int,
+        @Query("api_key") apiKey: String = BuildConfig.TMDB_ACCESS_KEY
+    ): MovieListResponse2
 
     @GET("movie/{movie_id}")
     suspend fun getMovieDetail(

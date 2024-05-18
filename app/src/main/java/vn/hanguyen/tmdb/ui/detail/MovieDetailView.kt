@@ -45,7 +45,7 @@ fun MovieDetailScreen(
     isExpandedScreen: Boolean,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    lazyListState: LazyListState = rememberLazyListState()
+//    lazyListState: LazyListState = rememberLazyListState()
 ) {
 
     Row(modifier.fillMaxSize()) {
@@ -63,7 +63,7 @@ fun MovieDetailScreen(
                     }
                 }
             },
-            lazyListState = lazyListState
+//            lazyListState = lazyListState
         )
     }
 }

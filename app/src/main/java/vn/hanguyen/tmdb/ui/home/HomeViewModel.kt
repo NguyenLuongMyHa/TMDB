@@ -36,7 +36,8 @@ class HomeViewModel @Inject constructor(
         HomeViewModelState(
             isLoading = true,
             selectedMovieId = preSelectedMovieId,
-            isInMovieDetailPage = preSelectedMovieId != null
+            isInMovieDetailPage = preSelectedMovieId != null,
+            moviesList = MoviesList(movies = mutableListOf())
         )
     )
 
@@ -50,7 +51,7 @@ class HomeViewModel @Inject constructor(
         )
 
     init {
-        refreshTrendingMovies()
+        getTrendingMoviesWithPaging()
 
         viewModelScope.launch {
             moviesRepository.observeSelectedMovies().collect { selectedItems ->
@@ -97,6 +98,42 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Search movies and update the UI state accordingly
+     */
+    fun getTrendingMoviesWithPaging() {
+        viewModelState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            try {
+                val resultPagingData =
+                    moviesRepository.getTrendingResultStream().cachedIn(viewModelScope)
+                        .first()
+
+                viewModelState.update {
+                    it.copy(
+                        isShowSearchResult = false,
+                        trendingMovieResultPagingData = flowOf(resultPagingData),
+                        isLoading = false,
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                val errorMessages = ErrorMessage(
+                    id = Random.nextLong(),
+                    messageId = R.string.load_error
+                )
+                viewModelState.update {
+                    it.copy(
+                        isShowSearchResult = false,
+                        errorMessages = listOf(errorMessages),
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    /**
      * Refresh movie and update the UI state accordingly
      */
     fun refreshTrendingMovies() {
@@ -111,8 +148,7 @@ class HomeViewModel @Inject constructor(
                         searchInput = "",
                         isShowSearchResult = false,
                         moviesList = MoviesList(
-                            trendingMovies = result.data.toMutableList(),
-                            searchResultMovies = mutableListOf()
+                            movies = result.data.toMutableList(),
                         ), isLoading = false
                     )
 
@@ -160,7 +196,7 @@ class HomeViewModel @Inject constructor(
                 viewModelState.update {
                     when (result) {
                         is Result.Success -> it.copy(
-                            moviesList = it.moviesList?.updateMovieDetail(result.data),
+                            moviesList = it.moviesList.updateMovieDetail(result.data),
                             selectedMovieId = movieId,
                             isInMovieDetailPage = true,
                             selectedMovieListId = it.selectedMovieListId.plus(movieId),
@@ -215,14 +251,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addMovieToSearchMemory(movie: Movie) {
+    fun addMovieToMemory(movie: Movie) {
         viewModelState.update {
             it.copy(
                 moviesList = MoviesList(
-                    searchResultMovies = it.moviesList?.searchResultMovies?.plus(
+                    movies = it.moviesList?.movies?.plus(
                         movie
                     )?.toMutableList() ?: mutableListOf(movie),
-                    trendingMovies = it.moviesList?.trendingMovies?.toMutableList() ?: mutableListOf()
                 )
             )
         }
