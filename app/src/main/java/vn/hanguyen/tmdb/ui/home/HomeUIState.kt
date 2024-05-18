@@ -31,7 +31,7 @@ sealed interface HomeUiState {
      */
     data class HasMovies(
         val moviesListPaging: Flow<PagingData<MovieResponse>>?,
-        val trendingMoviesListPaging: Flow<PagingData<MovieEntity>>?,
+        val trendingMoviesListPaging: Flow<PagingData<Movie>>?,
         val isSearchResult: Boolean,
         val selectedMovie: Movie?,
         val selectedMovieListId: Set<Int>,
@@ -45,7 +45,7 @@ sealed interface HomeUiState {
 data class HomeViewModelState(
     val moviesList: MoviesList,
     val searchMovieResultPagingData: Flow<PagingData<MovieResponse>>? = null,
-    val trendingMovieResultPagingData: Flow<PagingData<MovieEntity>>? = null,
+    val trendingMovieResultPagingData: Flow<PagingData<Movie>>? = null,
     val isShowSearchResult: Boolean = false,
     val isInMovieDetailPage: Boolean = false,
     val selectedMovieId: Int? = null,

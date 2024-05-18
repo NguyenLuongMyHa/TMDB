@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -106,13 +107,14 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val resultPagingData =
-                    moviesRepository.getTrendingResultStream().cachedIn(viewModelScope)
-                        .first()
+                    moviesRepository.getTrendingResultStream().cachedIn(viewModelScope).map {
+                        it.map { movie -> movie.toMovie() }
+                    }
 
                 viewModelState.update {
                     it.copy(
                         isShowSearchResult = false,
-                        trendingMovieResultPagingData = flowOf(resultPagingData),
+                        trendingMovieResultPagingData = resultPagingData,
                         isLoading = false,
                     )
                 }
@@ -177,8 +179,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             moviesRepository.selectMovie(movieId)
         }
-        if(listDetailMovieCached.any { it.id == movieId })
-        {
+        if (listDetailMovieCached.any { it.id == movieId }) {
             viewModelState.update {
                 it.copy(
                     selectedMovieId = movieId,
@@ -187,12 +188,11 @@ class HomeViewModel @Inject constructor(
                     isLoading = false
                 )
             }
-        }
-        else {
+        } else {
             //fetch more detail data if movie detail was not cached in memory
             viewModelScope.launch {
                 val result = moviesRepository.getMovie(movieId)
-                if(result is Result.Success) listDetailMovieCached.plusAssign(result.data)
+                if (result is Result.Success) listDetailMovieCached.plusAssign(result.data)
                 viewModelState.update {
                     when (result) {
                         is Result.Success -> it.copy(

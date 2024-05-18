@@ -268,7 +268,7 @@ private fun FullScreenLoading() {
 @Composable
 private fun MovieListGrid(
     moviesListPaging: Flow<PagingData<MovieResponse>>?,
-    trendingMoviesListPaging: Flow<PagingData<MovieEntity>>?,
+    trendingMoviesListPaging: Flow<PagingData<Movie>>?,
     isSearchResult: Boolean,
     selectedItems: Set<Int>,
     onSelectMovie: (postId: Int) -> Unit,
@@ -286,8 +286,8 @@ private fun MovieListGrid(
             )
         Text(
             text = contentTypeText,
-            style = Typography.titleLarge,
-            modifier = Modifier.padding(16.dp)
+            style = Typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         if (moviesListPaging != null && isSearchResult) {
 
@@ -313,7 +313,7 @@ private fun MovieListGrid(
             }
         } else if (trendingMoviesListPaging != null) {
 
-            val pagingItems: LazyPagingItems<MovieEntity> =
+            val pagingItems: LazyPagingItems<Movie> =
                 trendingMoviesListPaging.collectAsLazyPagingItems()
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -325,9 +325,8 @@ private fun MovieListGrid(
                     key = pagingItems.itemKey { it.id }
                 ) { index ->
                     val movie = pagingItems[index] ?: return@items
-                    onAddMovieToCache(movie.toMovie())
                     MovieCardItem(
-                        movie = movie.toMovie(),
+                        movie = movie,
                         isSelected = selectedItems.contains(movie.id),
                         onSelectMovie = { onSelectMovie(movie.id) }
                     )
@@ -354,7 +353,7 @@ private fun MovieListGrid(
 @Composable
 private fun MovieList(
     moviesListPaging: Flow<PagingData<MovieResponse>>?,
-    trendingMoviesListPaging: Flow<PagingData<MovieEntity>>?,
+    trendingMoviesListPaging: Flow<PagingData<Movie>>?,
     isSearchResult: Boolean,
     selectedItems: Set<Int>,
     onSelectMovie: (postId: Int) -> Unit,
@@ -372,8 +371,8 @@ private fun MovieList(
             )
         Text(
             text = contentTypeText,
-            style = Typography.titleLarge,
-            modifier = Modifier.padding(16.dp)
+            style = Typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         if (moviesListPaging != null && isSearchResult) {
             val pagingItems: LazyPagingItems<MovieResponse> =
@@ -397,7 +396,7 @@ private fun MovieList(
             }
         }
         else if (trendingMoviesListPaging != null) {
-            val pagingItems: LazyPagingItems<MovieEntity> =
+            val pagingItems: LazyPagingItems<Movie> =
                 trendingMoviesListPaging.collectAsLazyPagingItems()
             LazyColumn(
                 contentPadding = PaddingValues(all = 0.dp),
@@ -408,9 +407,9 @@ private fun MovieList(
                     key = pagingItems.itemKey { it.id }
                 ) { index ->
                     val movie = pagingItems[index] ?: return@items
-                    onAddMovieToCache(movie.toMovie())
+                    onAddMovieToCache(movie)
                     MovieCardItem(
-                        movie = movie.toMovie(),
+                        movie = movie,
                         isSelected = selectedItems.contains(movie.id),
                         onSelectMovie = { onSelectMovie(movie.id) }
                     )

@@ -25,4 +25,7 @@ interface RemoteKeysDao {
      */
     @Query("DELETE FROM remote_keys")
     suspend fun clearRemoteKeys()
+
+    @Query("SELECT * FROM remote_keys ORDER BY nextKey DESC LIMIT 1")
+    suspend fun getLastRemoteKey(): RemoteKeys?
 }
