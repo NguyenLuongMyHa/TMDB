@@ -65,39 +65,42 @@ class HomeViewModel @Inject constructor(
      * Search movies and update the UI state accordingly
      */
     fun searchMoviesWithPaging() {
-        viewModelState.update { it.copy(isLoading = true) }
+        if(viewModelState.value.searchInput!="") {
+            viewModelState.update { it.copy(isLoading = true) }
 
-        val searchKey = viewModelState.value.searchInput
-        viewModelScope.launch {
-            try {
-                val resultPagingData =
-                    moviesRepository.getSearchResultStream(searchKey).cachedIn(viewModelScope)
-                        .map {
-                            it.map { movie -> movie.toMovie() }
-                        }
+            val searchKey = viewModelState.value.searchInput
+            viewModelScope.launch {
+                try {
+                    val resultPagingData =
+                        moviesRepository.getSearchResultStream(searchKey).cachedIn(viewModelScope)
+                            .map {
+                                it.map { movie -> movie.toMovie() }
+                            }
 
-                viewModelState.update {
-                    it.copy(
-                        isShowSearchResult = true,
-                        searchMovieResultPagingData = resultPagingData,
-                        isLoading = false,
+                    viewModelState.update {
+                        it.copy(
+                            isShowSearchResult = true,
+                            searchMovieResultPagingData = resultPagingData,
+                            isLoading = false,
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    val errorMessages = ErrorMessage(
+                        id = Random.nextLong(),
+                        messageId = R.string.search_error
                     )
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                val errorMessages = ErrorMessage(
-                    id = Random.nextLong(),
-                    messageId = R.string.search_error
-                )
-                viewModelState.update {
-                    it.copy(
-                        isShowSearchResult = true,
-                        errorMessages = listOf(errorMessages),
-                        isLoading = false
-                    )
+                    viewModelState.update {
+                        it.copy(
+                            isShowSearchResult = true,
+                            errorMessages = listOf(errorMessages),
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }
+
     }
 
     /**
@@ -217,6 +220,7 @@ class HomeViewModel @Inject constructor(
         viewModelState.update {
             it.copy(searchInput = searchInput)
         }
+        if(searchInput == "") getTrendingMoviesWithPaging()
     }
 
     fun addMovieToMemory(movie: Movie) {

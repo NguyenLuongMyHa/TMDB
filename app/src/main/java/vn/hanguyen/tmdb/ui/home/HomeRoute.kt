@@ -56,7 +56,7 @@ fun HomeRoute(
     val homeScreenType = getHomeScreenType(isExpandedScreenInWidth, isExpandedScreenInHeight, uiState)
     when (homeScreenType) {
         LandscapeTabletListWithMovieDetail -> {
-            HomeListWithMovieDetailsScreen(
+            LandscapeTabletListWithMovieDetailScreen(
                 uiState = uiState,
                 onSelectMovieItem = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
@@ -70,7 +70,7 @@ fun HomeRoute(
         }
 
         PortraitTabletGridMovie -> {
-            HomeGridScreen(
+            PortraitTabletGridMovieScreen(
                 uiState = uiState,
                 onSelectMovie = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
@@ -81,7 +81,7 @@ fun HomeRoute(
             )
         }
         PortraitListMovie -> {
-            HomeScreen(
+            PortraitListMovieScreen(
                 uiState = uiState,
                 onSelectMovie = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,

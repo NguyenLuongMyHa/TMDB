@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,17 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -81,7 +75,7 @@ import vn.hanguyen.tmdb.util.interceptKey
  * The home screen displaying the movie list.
  */
 @Composable
-fun HomeScreen(
+fun PortraitListMovieScreen(
     uiState: HomeUiState,
     onSelectMovie: (Int) -> Unit,
     onRefreshMovies: () -> Unit,
@@ -113,46 +107,10 @@ fun HomeScreen(
     }
 }
 
-/**
- * The home screen displaying the movie list in tablet vertical.
- */
-@Composable
-fun HomeGridScreen(
-    uiState: HomeUiState,
-    onSelectMovie: (Int) -> Unit,
-    onRefreshMovies: () -> Unit,
-    homeListLazyGridState: LazyGridState,
-    modifier: Modifier = Modifier,
-    searchInput: String = "",
-    onSearchInputChanged: (String) -> Unit,
-    onSearchMovie: () -> Unit,
-    onAddMovieToCache: (movie: Movie) -> Unit,
-) {
-    HomeScreenWithList(
-        uiState = uiState,
-        onRefreshMovies = onRefreshMovies,
-        modifier = modifier,
-        searchInput = uiState.searchInput,
-        onSearchInputChanged = onSearchInputChanged,
-        onSearchMovie = onSearchMovie
-    ) { hasPostsUiState, contentPadding, contentModifier ->
-        MovieListGrid(
-            moviesListPaging = hasPostsUiState.searchMoviesListPaging,
-            trendingMoviesListPaging = hasPostsUiState.trendingMoviesListPaging,
-            selectedItems = hasPostsUiState.selectedMovieListId,
-            onAddMovieToCache = onAddMovieToCache,
-            onSelectMovie = onSelectMovie,
-            contentPadding = contentPadding,
-            modifier = contentModifier,
-            stateGrid = homeListLazyGridState,
-            isSearchResult = hasPostsUiState.isSearchResult
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreenWithList(
+fun HomeScreenWithList(
     uiState: HomeUiState,
     onRefreshMovies: () -> Unit,
     modifier: Modifier = Modifier,
@@ -171,7 +129,7 @@ private fun HomeScreenWithList(
         topBar = {
             HomeSearch(
                 Modifier.padding(16.dp),
-                searchInput = searchInput,
+                searchInput = uiState.searchInput,
                 onSearchInputChanged = onSearchInputChanged,
                 onSearchMovie = onSearchMovie
             )
@@ -255,92 +213,7 @@ private fun FullScreenLoading() {
 }
 
 @Composable
-private fun MovieListGrid(
-    moviesListPaging: Flow<PagingData<Movie>>?,
-    trendingMoviesListPaging: Flow<PagingData<Movie>>?,
-    isSearchResult: Boolean,
-    selectedItems: Set<Int>,
-    onSelectMovie: (postId: Int) -> Unit,
-    onAddMovieToCache: (movie: Movie) -> Unit,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
-    modifier: Modifier = Modifier,
-    stateGrid: LazyGridState = rememberLazyGridState(),
-) {
-    Column(
-        modifier = modifier.padding(contentPadding),
-    ) {
-        val contentTypeText =
-            if (isSearchResult) stringResource(id = R.string.search_result) else stringResource(
-                id = R.string.trending
-            )
-        Text(
-            text = contentTypeText,
-            style = Typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp, start = 16.dp, end = 16.dp)
-        )
-        if (moviesListPaging != null && isSearchResult) {
-
-            val pagingItems: LazyPagingItems<Movie> =
-                moviesListPaging.collectAsLazyPagingItems()
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(all = 12.dp),
-                state = stateGrid
-            ) {
-                items(
-                    count = pagingItems.itemCount,
-                    key = pagingItems.itemKey { it.id }
-                ) { index ->
-                    val movie = pagingItems[index] ?: return@items
-                    onAddMovieToCache(movie)
-                    MovieCardItem(
-                        movie = movie,
-                        isSelected = selectedItems.contains(movie.id),
-                        onSelectMovie = { onSelectMovie(movie.id) }
-                    )
-                }
-            }
-        } else if (trendingMoviesListPaging != null) {
-
-            val pagingItems: LazyPagingItems<Movie> =
-                trendingMoviesListPaging.collectAsLazyPagingItems()
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(all = 12.dp),
-                state = stateGrid
-            ) {
-                items(
-                    count = pagingItems.itemCount,
-                    key = pagingItems.itemKey { it.id }
-                ) { index ->
-                    val movie = pagingItems[index] ?: return@items
-                    MovieCardItem(
-                        movie = movie,
-                        isSelected = selectedItems.contains(movie.id),
-                        onSelectMovie = { onSelectMovie(movie.id) }
-                    )
-                }
-            }
-        }
-//        else {
-//            Column(
-//                modifier = modifier,
-//            ) {
-//                if (moviesList.isNotEmpty()) {
-//                    MovieItemSectionGrid(
-//                        moviesList,
-//                        selectedItems,
-//                        onSelectMovie,
-//                    )
-//
-//                }
-//            }
-//        }
-    }
-}
-
-@Composable
-private fun MovieList(
+fun MovieList(
     searchMoviesListPaging: Flow<PagingData<Movie>>?,
     trendingMoviesListPaging: Flow<PagingData<Movie>>?,
     isSearchResult: Boolean,
@@ -404,20 +277,6 @@ private fun MovieList(
                 }
             }
         }
-//        else {
-//            Column(
-//                modifier = modifier.verticalScroll(rememberScrollState())
-//            ) {
-//                if (moviesList.isNotEmpty()) {
-//                    MovieItemSection(
-//                        moviesList,
-//                        selectedItems,
-//                        onSelectMovie,
-//                    )
-//
-//                }
-//            }
-//        }
     }
 }
 
@@ -458,57 +317,6 @@ private fun HomeSearch(
     )
 }
 
-
-@Composable
-private fun MovieItemSectionGrid(
-    movies: List<Movie>,
-    selectedMovies: Set<Int>,
-    onSelectMovie: (Int) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(all = 12.dp)
-    ) {
-        items(
-            count = movies.size,
-            key = { it }
-        ) { index ->
-            MovieCardItemGrid(
-                movie = movies[index],
-                isSelected = selectedMovies.contains(movies[index].id),
-                onSelectMovie = { onSelectMovie(movies[index].id) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun MovieItemSection(
-    movies: List<Movie>,
-    selectedMovies: Set<Int>,
-    onSelectMovie: (Int) -> Unit
-) {
-    Column {
-        movies.forEach { movie ->
-            MovieCardItem(
-                movie = movie,
-                isSelected = selectedMovies.contains(movie.id),
-                onSelectMovie = { onSelectMovie(movie.id) }
-            )
-            MovieItemsListDivider()
-        }
-    }
-}
-
-@Composable
-private fun MovieItemsListDivider() {
-    Divider(
-        modifier = Modifier.padding(horizontal = 14.dp),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
-    )
-}
-
-
 @Composable
 fun MovieCardItem(
     movie: Movie,
@@ -533,23 +341,6 @@ fun MovieCardItem(
     }
 }
 
-@Composable
-fun MovieCardItemGrid(
-    movie: Movie,
-    onSelectMovie: (Int) -> Unit,
-    isSelected: Boolean,
-) {
-    Column(
-        modifier = Modifier
-            .clickable(onClick = {
-                onSelectMovie(movie.id)
-            })
-    ) {
-        MoviePosterImageGrid(movie, Modifier.padding(16.dp))
-        MovieTitle(movie, isSelected, Modifier.padding(horizontal = 16.dp))
-        YearAndVoteAverage(movie, Modifier.padding(horizontal = 16.dp))
-    }
-}
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -568,23 +359,6 @@ fun MoviePosterImage(movie: Movie, modifier: Modifier = Modifier) {
 
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun MoviePosterImageGrid(movie: Movie, modifier: Modifier = Modifier) {
-    GlideImage(
-        model = movie.posterPath,
-        contentDescription = "Poster image for the movie ${movie.title}",
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(3f / 4f)
-            .clip(
-                Shapes.small
-            ),
-        contentScale = ContentScale.Crop,
-        failure = placeholder(R.drawable.ic_launcher_foreground)
-    )
-
-}
 
 @Composable
 fun MovieTitle(movie: Movie, isSelected: Boolean, modifier: Modifier = Modifier) {
@@ -623,82 +397,11 @@ fun YearAndVoteAverage(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun HomeListWithMovieDetailsScreen(
-    uiState: HomeUiState,
-    onSelectMovieItem: (Int) -> Unit,
-    onRefreshMovies: () -> Unit,
-    onInteractWithList: () -> Unit,
-    onInteractWithDetail: (Int) -> Unit,
-    homeListLazyListState: LazyListState,
-//    movieDetailLazyListStates: Map<Int, LazyListState>,
-    modifier: Modifier = Modifier,
-    searchInput: String = "",
-    onSearchInputChanged: (String) -> Unit,
-    onSearchMovie: () -> Unit,
-    onAddMovieToCache: (movie: Movie) -> Unit,
-) {
-    HomeScreenWithList(
-        uiState = uiState,
-        onRefreshMovies = onRefreshMovies,
-        modifier = modifier,
-        searchInput = searchInput,
-        onSearchInputChanged = onSearchInputChanged,
-        onSearchMovie = onSearchMovie
-    ) { hasMoviesUiState, contentPadding, contentModifier ->
-        Row(contentModifier) {
-            MovieList(
-                searchMoviesListPaging = hasMoviesUiState.searchMoviesListPaging,
-                trendingMoviesListPaging = hasMoviesUiState.trendingMoviesListPaging,
-                selectedItems = hasMoviesUiState.selectedMovieListId,
-                onSelectMovie = onSelectMovieItem,
-                contentPadding = contentPadding,
-                modifier = contentModifier
-                    .width(334.dp)
-                    .notifyInput(onInteractWithList),
-                state = homeListLazyListState,
-                onAddMovieToCache = onAddMovieToCache,
-                isSearchResult = hasMoviesUiState.isSearchResult
-            )
-            // Crossfade between different detail posts
-            if (hasMoviesUiState.selectedMovie != null) {
-                Crossfade(
-                    modifier = contentModifier.padding(contentPadding),
-                    targetState = hasMoviesUiState.selectedMovie
-                ) { detailMovie ->
-                    // Get the lazy list state for this detail view
-//                val detailLazyListState by remember {
-//                    derivedStateOf {
-//                        movieDetailLazyListStates.getValue(detailMovie.id)
-//                    }
-//                }
-
-                    // Key against the movie id to avoid sharing any state between different movies
-                    key(detailMovie.id) {
-                        LazyColumn(
-//                        state = detailLazyListState,
-                            contentPadding = contentPadding,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .fillMaxSize()
-                                .notifyInput {
-                                    onInteractWithDetail(detailMovie.id)
-                                }
-                        ) {
-                            movieContentItems(detailMovie)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 /**
  * A [Modifier] that tracks all input, and calls [block] every time input is received.
  */
-private fun Modifier.notifyInput(block: () -> Unit): Modifier =
+fun Modifier.notifyInput(block: () -> Unit): Modifier =
     composed {
         val blockState = rememberUpdatedState(block)
         pointerInput(Unit) {
