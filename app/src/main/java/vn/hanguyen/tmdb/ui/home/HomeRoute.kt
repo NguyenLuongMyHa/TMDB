@@ -43,12 +43,12 @@ fun HomeRoute(
     uiState: HomeUiState,
     isExpandedScreenInWidth: Boolean,
     isExpandedScreenInHeight: Boolean,
-    onSelectMovieItem: (Long) -> Unit,
+    onSelectMovieItem: (Int) -> Unit,
     onRefreshMovies: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSearchMovie: () -> Unit,
     onInteractWithList: () -> Unit,
-    onInteractWithDetail: (Long) -> Unit,
+    onInteractWithDetail: (Int) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
     ) {
     // Construct the lazy list states for the list and the details outside of deciding which one to

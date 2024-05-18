@@ -17,21 +17,19 @@ import javax.inject.Inject
 
 class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService) : MoviesRepository {
     // for now, store these in memory, later, using Room
-    private val selectedMovies = MutableStateFlow<Set<Long>>(setOf())
+    private val selectedMovies = MutableStateFlow<Set<Int>>(setOf())
     private val trendingMoviesList = MutableStateFlow<List<Movie>?>(null)
 
     companion object {
         private const val NETWORK_PAGE_SIZE = 20 //TMDB configuration always return 20 movies per page, max 500 pages
     }
-    override suspend fun getMovie(movieId: Long?, fromSearchResult: Boolean): Result<Movie> {
+    override suspend fun getMovie(movieId: Int): Result<Movie> {
         return withContext(Dispatchers.IO) {
-
-            val movie =
-                if (fromSearchResult) movies.searchResultMovies.find { it.id == movieId } else movies.trendingMovies.find { it.id == movieId }
-            if (movie == null) {
+            try {
+                val result = service.getMovieDetail(movieId)
+                    Result.Success(result.toMovie())
+            } catch (_: Exception) {
                 Result.Error(IllegalArgumentException("Movie not found"))
-            } else {
-                Result.Success(movie)
             }
         }
     }
@@ -60,7 +58,7 @@ class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService)
             config = PagingConfig(enablePlaceholders = false, pageSize = NETWORK_PAGE_SIZE),
             pagingSourceFactory = { MoviePagingSource(service, query) }
         ).flow.map {
-            val movieIdMap = mutableSetOf<Long>()
+            val movieIdMap = mutableSetOf<Int>()
             it.filter { movie ->
                 if (movieIdMap.contains(movie.id)) {
                     false
@@ -71,11 +69,11 @@ class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService)
         }
     }
 
-    override fun observeSelectedMovies(): Flow<Set<Long>> = selectedMovies
+    override fun observeSelectedMovies(): Flow<Set<Int>> = selectedMovies
 
     override fun observeMoviesList(): Flow<List<Movie>?> = trendingMoviesList
 
-    override suspend fun selectMovie(movieId: Long) {
+    override suspend fun selectMovie(movieId: Int) {
         selectedMovies.update {
             it.plus(movieId)
         }

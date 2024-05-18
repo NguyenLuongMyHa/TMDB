@@ -3,10 +3,8 @@ package vn.hanguyen.tmdb.ui.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -30,7 +28,9 @@ class HomeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private var preSelectedMovieId: Long? = savedStateHandle["preSelectedMovieId"]
+    private var preSelectedMovieId: Int? = savedStateHandle["preSelectedMovieId"]
+
+    private val listDetailMovieCached = mutableListOf<Movie>()
 
     private val viewModelState = MutableStateFlow(
         HomeViewModelState(
@@ -111,8 +111,8 @@ class HomeViewModel @Inject constructor(
                         searchInput = "",
                         isShowSearchResult = false,
                         moviesList = MoviesList(
-                            trendingMovies = result.data,
-                            searchResultMovies = emptyList()
+                            trendingMovies = result.data.toMutableList(),
+                            searchResultMovies = mutableListOf()
                         ), isLoading = false
                     )
 
@@ -136,13 +136,51 @@ class HomeViewModel @Inject constructor(
     /**
      * Selects the movie to view more information detail about it.
      */
-    fun selectMovie(movieId: Long) {
+    fun selectMovie(movieId: Int) {
         interactedWithMovieDetails(movieId)
         viewModelScope.launch {
             moviesRepository.selectMovie(movieId)
         }
-        viewModelState.update {
-            it.copy(selectedMovieId = movieId)
+        if(listDetailMovieCached.any { it.id == movieId })
+        {
+            viewModelState.update {
+                it.copy(
+                    selectedMovieId = movieId,
+                    isInMovieDetailPage = true,
+                    selectedMovieListId = it.selectedMovieListId.plus(movieId),
+                    isLoading = false
+                )
+            }
+        }
+        else {
+            //fetch more detail data if movie detail was not cached in memory
+            viewModelScope.launch {
+                val result = moviesRepository.getMovie(movieId)
+                if(result is Result.Success) listDetailMovieCached.plusAssign(result.data)
+                viewModelState.update {
+                    when (result) {
+                        is Result.Success -> it.copy(
+                            moviesList = it.moviesList?.updateMovieDetail(result.data),
+                            selectedMovieId = movieId,
+                            isInMovieDetailPage = true,
+                            selectedMovieListId = it.selectedMovieListId.plus(movieId),
+                            isLoading = false
+                        )
+
+                        is Result.Error -> {
+                            val errorMessages = it.errorMessages + ErrorMessage(
+                                id = Random.nextLong(),
+                                messageId = R.string.load_error
+                            )
+                            it.copy(
+                                searchInput = "",
+                                isShowSearchResult = false,
+                                errorMessages = errorMessages, isLoading = false
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -158,7 +196,7 @@ class HomeViewModel @Inject constructor(
     /**
      * Notify that the user interacted with the movie details
      */
-    fun interactedWithMovieDetails(movieId: Long) {
+    fun interactedWithMovieDetails(movieId: Int) {
         viewModelState.update {
             it.copy(
                 selectedMovieId = movieId,
@@ -183,8 +221,8 @@ class HomeViewModel @Inject constructor(
                 moviesList = MoviesList(
                     searchResultMovies = it.moviesList?.searchResultMovies?.plus(
                         movie
-                    ) ?: listOf(movie),
-                    trendingMovies = it.moviesList?.trendingMovies ?: emptyList()
+                    )?.toMutableList() ?: mutableListOf(movie),
+                    trendingMovies = it.moviesList?.trendingMovies?.toMutableList() ?: mutableListOf()
                 )
             )
         }

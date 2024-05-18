@@ -8,7 +8,7 @@ interface MoviesRepository {
     /**
      * Get a specific movie.
      */
-    suspend fun getMovie(movieId: Long?, fromSearchResult: Boolean = false): Result<Movie>
+    suspend fun getMovie(movieId: Int): Result<Movie>
 
     /**
      * Get trending movies.
@@ -22,7 +22,7 @@ interface MoviesRepository {
     /**
      * Observe the current selected movies
      */
-    fun observeSelectedMovies(): Flow<Set<Long>>
+    fun observeSelectedMovies(): Flow<Set<Int>>
 
     /**
      * Observe the movie list
@@ -32,5 +32,5 @@ interface MoviesRepository {
     /**
      * Select a movie.
      */
-    suspend fun selectMovie(movieId: Long)
+    suspend fun selectMovie(movieId: Int)
 }

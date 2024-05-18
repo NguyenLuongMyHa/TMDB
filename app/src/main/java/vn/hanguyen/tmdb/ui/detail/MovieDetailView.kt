@@ -36,7 +36,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.model.Movie
-import vn.hanguyen.tmdb.model.MovieProduction
+import vn.hanguyen.tmdb.model.MovieCollection
 import vn.hanguyen.tmdb.ui.theme.Shapes
 
 @Composable
@@ -79,7 +79,7 @@ private fun MovieDetailScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = movie.title,
+                title = movie.title?:"",
                 navigationIconContent = navigationIconContent,
             )
         },
@@ -113,28 +113,28 @@ fun LazyListScope.movieContentItems(movie: Movie) {
     item {
         MoviePosterHeaderImage(movie)
         Spacer(Modifier.height(16.dp))
-        Text(movie.title, style = MaterialTheme.typography.headlineLarge)
+        Text(movie.title?:"", style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(8.dp))
         if (movie.overview != null) {
             Text(movie.overview, style = MaterialTheme.typography.bodyMedium)
             Spacer(androidx.compose.ui.Modifier.height(16.dp))
         }
     }
-    if (movie.production != null) {
-        item { MovieProduction(movie.production, Modifier.padding(bottom = 24.dp)) }
+    if (movie.belongsToCollection != null) {
+        item { MovieCollection(movie.belongsToCollection, Modifier.padding(bottom = 24.dp)) }
     }
 }
 
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun MovieProduction(
-    production: MovieProduction,
+private fun MovieCollection(
+    collection: MovieCollection,
     modifier: Modifier = Modifier
 ) {
     Row {
         GlideImage(
-            model = production.imageUrl,
+            model = collection.posterPath,
             contentDescription = "Poster image for the movie's production",
             modifier = Modifier.size(40.dp),
             contentScale = ContentScale.Fit,
@@ -143,14 +143,9 @@ private fun MovieProduction(
         Spacer(Modifier.width(8.dp))
         Column {
             Text(
-                text = production.name,
+                text = collection.name?:"",
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 4.dp)
-            )
-
-            Text(
-                text = production.country,
-                style = MaterialTheme.typography.bodySmall
             )
         }
     }
@@ -165,7 +160,7 @@ private fun MoviePosterHeaderImage(movie: Movie) {
             .fillMaxWidth()
             .clip(shape = Shapes.small)
     GlideImage(
-        model = movie.posterUrl,
+        model = movie.posterPath,
         contentDescription = "Poster image for the movie ${movie.title}",
         modifier = imageModifier,
         contentScale = ContentScale.FillBounds,

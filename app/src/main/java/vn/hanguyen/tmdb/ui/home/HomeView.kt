@@ -88,7 +88,7 @@ import vn.hanguyen.tmdb.util.interceptKey
 fun HomeScreen(
     uiState: HomeUiState,
     showTopAppBar: Boolean,
-    onSelectMovie: (Long) -> Unit,
+    onSelectMovie: (Int) -> Unit,
     onRefreshMovies: () -> Unit,
     homeListLazyListState: LazyListState,
     modifier: Modifier = Modifier,
@@ -127,7 +127,7 @@ fun HomeScreen(
 fun HomeGridScreen(
     uiState: HomeUiState,
     showTopAppBar: Boolean,
-    onSelectMovie: (Long) -> Unit,
+    onSelectMovie: (Int) -> Unit,
     onRefreshMovies: () -> Unit,
     homeListLazyGridState: LazyGridState,
     modifier: Modifier = Modifier,
@@ -269,8 +269,8 @@ private fun MovieListGrid(
     moviesList: List<Movie>,
     moviesListPaging: Flow<PagingData<MovieResponse>>?,
     isSearchResult: Boolean,
-    selectedItems: Set<Long>,
-    onSelectMovie: (postId: Long) -> Unit,
+    selectedItems: Set<Int>,
+    onSelectMovie: (postId: Int) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
@@ -340,8 +340,8 @@ private fun MovieList(
     moviesList: List<Movie>,
     moviesListPaging: Flow<PagingData<MovieResponse>>?,
     isSearchResult: Boolean,
-    selectedItems: Set<Long>,
-    onSelectMovie: (postId: Long) -> Unit,
+    selectedItems: Set<Int>,
+    onSelectMovie: (postId: Int) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
@@ -450,8 +450,8 @@ private fun HomeSearch(
 @Composable
 private fun MovieItemSectionGrid(
     movies: List<Movie>,
-    selectedMovies: Set<Long>,
-    onSelectMovie: (Long) -> Unit
+    selectedMovies: Set<Int>,
+    onSelectMovie: (Int) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -473,8 +473,8 @@ private fun MovieItemSectionGrid(
 @Composable
 private fun MovieItemSection(
     movies: List<Movie>,
-    selectedMovies: Set<Long>,
-    onSelectMovie: (Long) -> Unit
+    selectedMovies: Set<Int>,
+    onSelectMovie: (Int) -> Unit
 ) {
     Column {
         movies.forEach { movie ->
@@ -500,7 +500,7 @@ private fun MovieItemsListDivider() {
 @Composable
 fun MovieCardItem(
     movie: Movie,
-    onSelectMovie: (Long) -> Unit,
+    onSelectMovie: (Int) -> Unit,
     isSelected: Boolean,
 ) {
     Row(
@@ -524,7 +524,7 @@ fun MovieCardItem(
 @Composable
 fun MovieCardItemGrid(
     movie: Movie,
-    onSelectMovie: (Long) -> Unit,
+    onSelectMovie: (Int) -> Unit,
     isSelected: Boolean,
 ) {
     Column(
@@ -543,7 +543,7 @@ fun MovieCardItemGrid(
 @Composable
 fun MoviePosterImage(movie: Movie, modifier: Modifier = Modifier) {
     GlideImage(
-        model = movie.posterUrl,
+        model = movie.posterPath,
         contentDescription = "Poster image for the movie ${movie.title}",
         modifier = modifier
             .size(64.dp)
@@ -560,7 +560,7 @@ fun MoviePosterImage(movie: Movie, modifier: Modifier = Modifier) {
 @Composable
 fun MoviePosterImageGrid(movie: Movie, modifier: Modifier = Modifier) {
     GlideImage(
-        model = movie.posterUrl,
+        model = movie.posterPath,
         contentDescription = "Poster image for the movie ${movie.title}",
         modifier = modifier
             .fillMaxWidth()
@@ -580,7 +580,7 @@ fun MovieTitle(movie: Movie, isSelected: Boolean, modifier: Modifier = Modifier)
         MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.Underline)
     } else MaterialTheme.typography.titleMedium
     Text(
-        text = movie.title,
+        text = movie.title?:"",
         style = style,
         maxLines = 3,
         overflow = TextOverflow.Ellipsis,
@@ -595,12 +595,9 @@ fun YearAndVoteAverage(
 ) {
     Row(modifier) {
         Text(
-            text = stringResource(
-                id = R.string.home_movie_year_vote,
-                formatArgs = arrayOf(
-                    movie.releaseYear,
-                    movie.voteAverage
-                )
+            text = stringResource(id = R.string.home_movie_year_vote,
+                movie.releaseDate.substring(0,4),
+                movie.voteAverage?:0f
             ),
             style = MaterialTheme.typography.bodyMedium
         )
@@ -613,12 +610,12 @@ fun YearAndVoteAverage(
 fun HomeListWithMovieDetailsScreen(
     uiState: HomeUiState,
     showTopAppBar: Boolean,
-    onSelectMovieItem: (Long) -> Unit,
+    onSelectMovieItem: (Int) -> Unit,
     onRefreshMovies: () -> Unit,
     onInteractWithList: () -> Unit,
-    onInteractWithDetail: (Long) -> Unit,
+    onInteractWithDetail: (Int) -> Unit,
     homeListLazyListState: LazyListState,
-    movieDetailLazyListStates: Map<Long, LazyListState>,
+    movieDetailLazyListStates: Map<Int, LazyListState>,
     modifier: Modifier = Modifier,
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
