@@ -72,12 +72,14 @@ class HomeViewModel @Inject constructor(
             try {
                 val resultPagingData =
                     moviesRepository.getSearchResultStream(searchKey).cachedIn(viewModelScope)
-                        .first()
+                        .map {
+                            it.map { movie -> movie.toMovie() }
+                        }
 
                 viewModelState.update {
                     it.copy(
                         isShowSearchResult = true,
-                        searchMovieResultPagingData = flowOf(resultPagingData),
+                        searchMovieResultPagingData = resultPagingData,
                         isLoading = false,
                     )
                 }
@@ -114,6 +116,7 @@ class HomeViewModel @Inject constructor(
                 viewModelState.update {
                     it.copy(
                         isShowSearchResult = false,
+                        searchInput = "",
                         trendingMovieResultPagingData = resultPagingData,
                         isLoading = false,
                     )
@@ -127,6 +130,7 @@ class HomeViewModel @Inject constructor(
                 viewModelState.update {
                     it.copy(
                         isShowSearchResult = false,
+                        searchInput = "",
                         errorMessages = listOf(errorMessages),
                         isLoading = false
                     )
@@ -134,42 +138,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
-    /**
-     * Refresh movie and update the UI state accordingly
-     */
-    fun refreshTrendingMovies() {
-        // Ui state is refreshing
-        viewModelState.update { it.copy(isLoading = true) }
-
-        viewModelScope.launch {
-            val result = moviesRepository.getTrendingMovies()
-            viewModelState.update {
-                when (result) {
-                    is Result.Success -> it.copy(
-                        searchInput = "",
-                        isShowSearchResult = false,
-                        moviesList = MoviesList(
-                            movies = result.data.toMutableList(),
-                        ), isLoading = false
-                    )
-
-                    is Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = Random.nextLong(),
-                            messageId = R.string.load_error
-                        )
-                        it.copy(
-                            searchInput = "",
-                            isShowSearchResult = false,
-                            errorMessages = errorMessages, isLoading = false
-                        )
-                    }
-                }
-            }
-        }
-    }
-
 
     /**
      * Selects the movie to view more information detail about it.

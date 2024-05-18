@@ -13,11 +13,6 @@ interface MoviesRepository {
     suspend fun getMovie(movieId: Int): Result<Movie>
 
     /**
-     * Get trending movies.
-     */
-    suspend fun getTrendingMovies():  Result<List<Movie>>
-
-    /**
      * Search movies.
      */
     fun getSearchResultStream(query: String): Flow<PagingData<MovieResponse>>

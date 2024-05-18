@@ -42,18 +42,16 @@ import vn.hanguyen.tmdb.ui.theme.Shapes
 @Composable
 fun MovieDetailScreen(
     movie: Movie,
-    isExpandedScreen: Boolean,
+    isTablet: Boolean,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-//    lazyListState: LazyListState = rememberLazyListState()
 ) {
 
     Row(modifier.fillMaxSize()) {
         MovieDetailScreenContent(
             movie = movie,
-            // Allow opening the Drawer if the screen is not expanded
             navigationIconContent = {
-                if (!isExpandedScreen) {
+                if (!isTablet) {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -63,7 +61,6 @@ fun MovieDetailScreen(
                     }
                 }
             },
-//            lazyListState = lazyListState
         )
     }
 }

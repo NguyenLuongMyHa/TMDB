@@ -2,8 +2,6 @@ package vn.hanguyen.tmdb.ui.home
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import vn.hanguyen.tmdb.data.local.MovieEntity
-import vn.hanguyen.tmdb.data.remote.MovieResponse
 import vn.hanguyen.tmdb.model.Movie
 import vn.hanguyen.tmdb.model.MoviesList
 import vn.hanguyen.tmdb.util.ErrorMessage
@@ -30,7 +28,7 @@ sealed interface HomeUiState {
      * There are movies to render
      */
     data class HasMovies(
-        val moviesListPaging: Flow<PagingData<MovieResponse>>?,
+        val searchMoviesListPaging: Flow<PagingData<Movie>>?,
         val trendingMoviesListPaging: Flow<PagingData<Movie>>?,
         val isSearchResult: Boolean,
         val selectedMovie: Movie?,
@@ -44,7 +42,7 @@ sealed interface HomeUiState {
 
 data class HomeViewModelState(
     val moviesList: MoviesList,
-    val searchMovieResultPagingData: Flow<PagingData<MovieResponse>>? = null,
+    val searchMovieResultPagingData: Flow<PagingData<Movie>>? = null,
     val trendingMovieResultPagingData: Flow<PagingData<Movie>>? = null,
     val isShowSearchResult: Boolean = false,
     val isInMovieDetailPage: Boolean = false,
@@ -76,7 +74,7 @@ data class HomeViewModelState(
                 selectedMovie = movieList.find {
                     it.id == selectedMovieId
                 } ?: movieList.elementAtOrNull(0),//TODO make sure always have a selected movie here
-                moviesListPaging = searchMovieResultPagingData,
+                searchMoviesListPaging = searchMovieResultPagingData,
                 trendingMoviesListPaging = trendingMovieResultPagingData,
                 selectedMovieListId = selectedMovieListId,
                 isLoading = isLoading,
