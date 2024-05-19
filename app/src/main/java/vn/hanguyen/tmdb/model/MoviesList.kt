@@ -4,9 +4,9 @@ class MoviesList(
     var movies: MutableList<Movie>,
 ) {
     fun updateMovieDetail(movie: Movie) : MoviesList {
-        movies.mapInPlace {
-            if (it.id == movie.id) movie else it
-        }
+        if(movies.find { it.id == movie.id } != null) {
+            movies.mapInPlace { if (it.id == movie.id) movie else it }
+        } else movies.add(movie)
         return this
     }
 

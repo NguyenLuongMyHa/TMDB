@@ -86,7 +86,6 @@ private fun MovieDetailScreenContent(
     navigationIconContent: @Composable () -> Unit = { },
     lazyListState: LazyListState = rememberLazyListState()
 ) {
-    val topAppBarState = rememberTopAppBarState()
     Scaffold(
         topBar = {
             TopAppBar(

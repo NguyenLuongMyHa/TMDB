@@ -1,7 +1,5 @@
 package vn.hanguyen.tmdb.ui.home
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -31,7 +28,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +61,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.isActive
 import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.model.Movie
-import vn.hanguyen.tmdb.ui.detail.movieContentItems
 import vn.hanguyen.tmdb.ui.theme.Shapes
 import vn.hanguyen.tmdb.ui.theme.Typography
 import vn.hanguyen.tmdb.util.interceptKey
@@ -77,7 +72,7 @@ import vn.hanguyen.tmdb.util.interceptKey
 @Composable
 fun PortraitListMovieScreen(
     uiState: HomeUiState,
-    onSelectMovie: (Int) -> Unit,
+    onSelectMovie: (Int, Boolean) -> Unit,
     onRefreshMovies: () -> Unit,
     homeListLazyListState: LazyListState,
     modifier: Modifier = Modifier,
@@ -218,7 +213,7 @@ fun MovieList(
     trendingMoviesListPaging: Flow<PagingData<Movie>>?,
     isSearchResult: Boolean,
     selectedItems: Set<Int>,
-    onSelectMovie: (postId: Int) -> Unit,
+    onSelectMovie: (id: Int, fromTrending: Boolean) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
@@ -252,7 +247,7 @@ fun MovieList(
                     MovieCardItem(
                         movie = movie,
                         isSelected = selectedItems.contains(movie.id),
-                        onSelectMovie = { onSelectMovie(movie.id) }
+                        onSelectMovie = { onSelectMovie(movie.id, false) }
                     )
                 }
             }
@@ -272,7 +267,7 @@ fun MovieList(
                     MovieCardItem(
                         movie = movie,
                         isSelected = selectedItems.contains(movie.id),
-                        onSelectMovie = { onSelectMovie(movie.id) }
+                        onSelectMovie = { onSelectMovie(movie.id, true) }
                     )
                 }
             }

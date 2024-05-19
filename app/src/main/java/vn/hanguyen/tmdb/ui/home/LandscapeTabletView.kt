@@ -17,7 +17,7 @@ import vn.hanguyen.tmdb.ui.detail.movieContentItems
 @Composable
 fun LandscapeTabletListWithMovieDetailScreen(
     uiState: HomeUiState,
-    onSelectMovieItem: (Int) -> Unit,
+    onSelectMovieItem: (Int, Boolean) -> Unit,
     onRefreshMovies: () -> Unit,
     onInteractWithList: () -> Unit,
     onInteractWithDetail: (Int) -> Unit,

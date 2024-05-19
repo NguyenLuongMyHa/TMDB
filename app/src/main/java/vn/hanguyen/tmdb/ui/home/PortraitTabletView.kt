@@ -36,7 +36,7 @@ import vn.hanguyen.tmdb.ui.theme.Typography
 @Composable
 fun PortraitTabletGridMovieScreen(
     uiState: HomeUiState,
-    onSelectMovie: (Int) -> Unit,
+    onSelectMovie: (Int, Boolean) -> Unit,
     onRefreshMovies: () -> Unit,
     homeListLazyGridState: LazyGridState,
     modifier: Modifier = Modifier,
@@ -73,7 +73,7 @@ private fun MovieListGrid(
     trendingMoviesListPaging: Flow<PagingData<Movie>>?,
     isSearchResult: Boolean,
     selectedItems: Set<Int>,
-    onSelectMovie: (postId: Int) -> Unit,
+    onSelectMovie: (id: Int, fromTrending: Boolean) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
@@ -109,7 +109,7 @@ private fun MovieListGrid(
                     MovieCardItemGrid(
                         movie = movie,
                         isSelected = selectedItems.contains(movie.id),
-                        onSelectMovie = { onSelectMovie(movie.id) }
+                        onSelectMovie = { onSelectMovie(movie.id, false) }
                     )
                 }
             }
@@ -130,7 +130,7 @@ private fun MovieListGrid(
                     MovieCardItemGrid(
                         movie = movie,
                         isSelected = selectedItems.contains(movie.id),
-                        onSelectMovie = { onSelectMovie(movie.id) }
+                        onSelectMovie = { onSelectMovie(movie.id, true) }
                     )
                 }
             }

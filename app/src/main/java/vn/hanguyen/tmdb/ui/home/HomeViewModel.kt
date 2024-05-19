@@ -189,22 +189,52 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun selectMovie(movieId: Int) {
+    fun selectMovie(movieId: Int, fromTrending: Boolean) {
         viewModelScope.launch {
             moviesRepository.selectMovie(movieId)
         }
         //fetch more detail data if movie detail was not cached in memory
         viewModelScope.launch {
             val result = moviesRepository.getMovie(movieId)
-            if (result is Result.Success) {
-                moviesRepository.updateSelectedMovie(result.data.toMovieEntity())
-            }
-            val movieCache = moviesRepository.getSelectedMovie(movieId)
-            if (movieCache != null) {
+            if(fromTrending) {
+                if (result is Result.Success) {
+                    moviesRepository.updateSelectedMovie(result.data.toMovieEntity())
+                }
+                val movieCache = moviesRepository.getSelectedMovie(movieId)
+                if (movieCache != null) {
+                    viewModelState.update {
+                        when (result) {
+                            is Result.Success -> it.copy(
+                                moviesList = it.moviesList.updateMovieDetail(movieCache.toMovie()),
+                                selectedMovieId = movieId,
+                                isInMovieDetailPage = true,
+                                selectedMovieListId = it.selectedMovieListId.plus(movieId),
+                                isLoading = false
+                            )
+
+                            is Result.Error -> {
+                                val errorMessages = it.errorMessages + ErrorMessage(
+                                    id = Random.nextLong(),
+                                    messageId = R.string.load_error
+                                )
+                                it.copy(
+                                    moviesList = it.moviesList.updateMovieDetail(movieCache.toMovie()),
+                                    searchInput = "",
+                                    isShowSearchResult = false,
+                                    errorMessages = errorMessages, isLoading = false
+                                )
+                            }
+                        }
+                    }
+
+                    interactedWithMovieDetails(movieId)
+
+                }
+            } else {
                 viewModelState.update {
                     when (result) {
                         is Result.Success -> it.copy(
-                            moviesList = it.moviesList.updateMovieDetail(movieCache.toMovie()),
+                            moviesList = it.moviesList.updateMovieDetail(result.data),
                             selectedMovieId = movieId,
                             isInMovieDetailPage = true,
                             selectedMovieListId = it.selectedMovieListId.plus(movieId),
@@ -217,7 +247,6 @@ class HomeViewModel @Inject constructor(
                                 messageId = R.string.load_error
                             )
                             it.copy(
-                                moviesList = it.moviesList.updateMovieDetail(movieCache.toMovie()),
                                 searchInput = "",
                                 isShowSearchResult = false,
                                 errorMessages = errorMessages, isLoading = false
@@ -225,10 +254,8 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 }
-
-                interactedWithMovieDetails(movieId)
-
             }
+
         }
     }
 
