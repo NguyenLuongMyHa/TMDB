@@ -2,6 +2,7 @@ package vn.hanguyen.tmdb.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -46,9 +50,8 @@ import com.bumptech.glide.integration.compose.placeholder
 import vn.hanguyen.tmdb.R
 import vn.hanguyen.tmdb.model.Genres
 import vn.hanguyen.tmdb.model.Movie
-import vn.hanguyen.tmdb.model.MovieCollection
+import vn.hanguyen.tmdb.model.ProductionCompany
 import vn.hanguyen.tmdb.ui.theme.Shapes
-import vn.hanguyen.tmdb.ui.theme.Typography
 
 @Composable
 fun MovieDetailScreen(
@@ -117,23 +120,24 @@ fun MovieContent(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 fun LazyListScope.movieContentItems(movie: Movie) {
     item {
         MoviePosterHeaderImage(movie)
         Spacer(Modifier.height(16.dp))
         Text(movie.title ?: "", style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(8.dp))
-        if (movie.overview != null) {
-            Text(movie.overview, style = MaterialTheme.typography.bodyMedium)
-            Spacer(androidx.compose.ui.Modifier.height(16.dp))
+        movie.overview?.let {
+            Text(movie.overview)
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(modifier = Modifier.height(12.dp))
 
-        GenresListItem(
-            movie.genres
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
+        movie.genres?.let {
+            GenresListItem(
+                movie.genres
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         var releaseYear: String = try {
             movie.releaseDate.substring(0, 4)
@@ -168,45 +172,68 @@ fun LazyListScope.movieContentItems(movie: Movie) {
             )
         }
 
-
-        movie.homepage?.let {
+        movie.belongsToCollection?.let {
             Spacer(modifier = Modifier.height(12.dp))
-            val uriHandler = LocalUriHandler.current
-            Text(
-                modifier = Modifier.clickable { uriHandler.openUri(it) },
-                text = it,
-                style = Typography.bodyMedium.copy(textDecoration = TextDecoration.Underline)
+            Text(text = "Belong to collection: ${movie.belongsToCollection.name}")
+            Spacer(modifier = Modifier.height(12.dp))
+            GlideImage(
+                model = movie.belongsToCollection.posterPath,
+                contentDescription = "Poster image for the movie's production",
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .aspectRatio(3f / 4f),
+                contentScale = ContentScale.Fit,
+                failure = placeholder(R.drawable.ic_launcher_foreground)
             )
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
-    if (movie.belongsToCollection != null) {
-        item { MovieCollection(movie.belongsToCollection, Modifier.padding(bottom = 24.dp)) }
+    movie.productionCompanies?.let {
+        item {
+            Text(text = "Production companies:", modifier = Modifier.padding(top = 12.dp))
+        }
+        items(count = movie.productionCompanies.size) {
+            MovieProductionCompany(movie.productionCompanies[it])
+        }
     }
+    movie.homepage?.let {
+        item {
+            Column {
+                Spacer(modifier = Modifier.height(12.dp))
+                val uriHandler = LocalUriHandler.current
+                Text(
+                    modifier = Modifier.clickable { uriHandler.openUri(it) },
+                    text = it,
+                    style = TextStyle().copy(textDecoration = TextDecoration.Underline, color = Color.Blue)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+
 }
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 fun GenresListItem(
-    genres: List<Genres>?
+    genres: List<Genres>
 ) {
     FlowRow {
-        if (genres != null) {
-            for (genre in genres) {
-                Box(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .background(Color.Gray, MaterialTheme.shapes.small),
-                    contentAlignment = Alignment.Center
-                ) {
-                    genre.name?.let {
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White
-                        )
-                    }
+        for (genre in genres) {
+            Box(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .background(Color.Gray, MaterialTheme.shapes.small),
+                contentAlignment = Alignment.Center
+            ) {
+                genre.name?.let {
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
                 }
             }
         }
@@ -215,24 +242,25 @@ fun GenresListItem(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun MovieCollection(
-    collection: MovieCollection,
+private fun MovieProductionCompany(
+    productionCompany: ProductionCompany,
     modifier: Modifier = Modifier
 ) {
     Row {
         GlideImage(
-            model = collection.posterPath,
-            contentDescription = "Poster image for the movie's production",
-            modifier = Modifier.size(40.dp),
+            model = productionCompany.logoPath,
+            contentDescription = "logo image for the movie's production company",
+            modifier = Modifier.size(64.dp),
             contentScale = ContentScale.Fit,
             failure = placeholder(R.drawable.ic_launcher_foreground)
         )
         Spacer(Modifier.width(8.dp))
         Column {
             Text(
-                text = collection.name ?: "",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(top = 4.dp)
+                text = productionCompany.name ?: "",
+            )
+            Text(
+                text = productionCompany.originCountry ?: "",
             )
         }
     }

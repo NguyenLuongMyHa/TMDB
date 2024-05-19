@@ -40,28 +40,36 @@ data class Movie(
         budget = budget,
         popularity = popularity,
         homepage = homepage,
-//            belongsToCollection = belongsToCollection?.toMovieCollection(),
-//            originCountry = originCountry,
-//            genres = genres?.map{ genre -> genre.toGenres()},
-//            spokenLanguages = spokenLanguages?.map { spokenLanguage -> spokenLanguage.toSpokenLanguage() },
-//            productionCompanies = productionCompanies?.map { productionCompany -> productionCompany.toProductionCompany() },
+        belongsToCollection = belongsToCollection?.toMovieCollection(),
+        originCountry = originCountry,
+        genres = genres?.map{ genre -> genre.toGenres()},
+        spokenLanguages = spokenLanguages?.map { spokenLanguage -> spokenLanguage.toSpokenLanguage() },
+        productionCompanies = productionCompanies?.map { productionCompany -> productionCompany.toProductionCompany() },
     )
 }
 data class MovieCollection (
     val id: String,
     val name: String? = null,
     val posterPath: String? = null,
-)
+) {
+    fun toMovieCollection(): vn.hanguyen.tmdb.data.remote.MovieCollection = vn.hanguyen.tmdb.data.remote.MovieCollection(id, name, posterPath)
+}
 data class ProductionCompany (
     val logoPath: String? = null,
     val name: String? = null,
     val originCountry: String? = null,
-)
+) {
+    fun toProductionCompany(): vn.hanguyen.tmdb.data.remote.ProductionCompany = vn.hanguyen.tmdb.data.remote.ProductionCompany(logoPath, name, originCountry)
+}
 
 data class SpokenLanguage(
     val englishName: String? = null,
-)
+) {
+    fun toSpokenLanguage(): vn.hanguyen.tmdb.data.remote.SpokenLanguage = vn.hanguyen.tmdb.data.remote.SpokenLanguage(englishName)
+}
 
 data class Genres(
     val name: String? = null,
-)
+) {
+    fun toGenres(): vn.hanguyen.tmdb.data.remote.Genres = vn.hanguyen.tmdb.data.remote.Genres(name)
+}
