@@ -50,9 +50,6 @@ fun HomeRoute(
     onInteractWithDetail: (Int) -> Unit,
     onAddMovieToCache: (movie: Movie) -> Unit,
     ) {
-    val homeListLazyListState = rememberLazyListState()
-    val homeListLazyGridState = rememberLazyGridState()
-
     val homeScreenType = getHomeScreenType(isExpandedScreenInWidth, isExpandedScreenInHeight, uiState)
     when (homeScreenType) {
         LandscapeTabletListWithMovieDetail -> {
@@ -62,7 +59,6 @@ fun HomeRoute(
                 onRefreshMovies = onRefreshMovies,
                 onInteractWithList = onInteractWithList,
                 onInteractWithDetail = onInteractWithDetail,
-                homeListLazyListState = homeListLazyListState,
                 onSearchInputChanged = onSearchInputChanged,
                 onSearchMovie = onSearchMovie,
                 onAddMovieToCache = onAddMovieToCache
@@ -74,7 +70,6 @@ fun HomeRoute(
                 uiState = uiState,
                 onSelectMovie = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
-                homeListLazyGridState = homeListLazyGridState,
                 onSearchInputChanged = onSearchInputChanged,
                 onSearchMovie = onSearchMovie,
                 onAddMovieToCache = onAddMovieToCache
@@ -85,7 +80,6 @@ fun HomeRoute(
                 uiState = uiState,
                 onSelectMovie = onSelectMovieItem,
                 onRefreshMovies = onRefreshMovies,
-                homeListLazyListState = homeListLazyListState,
                 onSearchInputChanged = onSearchInputChanged,
                 onSearchMovie = onSearchMovie,
                 onAddMovieToCache = onAddMovieToCache

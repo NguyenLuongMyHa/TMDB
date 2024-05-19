@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
@@ -21,7 +22,6 @@ fun LandscapeTabletListWithMovieDetailScreen(
     onRefreshMovies: () -> Unit,
     onInteractWithList: () -> Unit,
     onInteractWithDetail: (Int) -> Unit,
-    homeListLazyListState: LazyListState,
 //    movieDetailLazyListStates: Map<Int, LazyListState>,
     modifier: Modifier = Modifier,
     searchInput: String = "",
@@ -47,7 +47,6 @@ fun LandscapeTabletListWithMovieDetailScreen(
                 modifier = contentModifier
                     .width(334.dp)
                     .notifyInput(onInteractWithList),
-                state = homeListLazyListState,
                 onAddMovieToCache = onAddMovieToCache,
                 isSearchResult = hasMoviesUiState.isSearchResult
             )

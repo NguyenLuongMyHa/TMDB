@@ -74,7 +74,6 @@ fun PortraitListMovieScreen(
     uiState: HomeUiState,
     onSelectMovie: (Int, Boolean) -> Unit,
     onRefreshMovies: () -> Unit,
-    homeListLazyListState: LazyListState,
     modifier: Modifier = Modifier,
     onSearchInputChanged: (String) -> Unit,
     onSearchMovie: () -> Unit,
@@ -96,7 +95,6 @@ fun PortraitListMovieScreen(
             onSelectMovie = onSelectMovie,
             contentPadding = contentPadding,
             modifier = contentModifier,
-            state = homeListLazyListState,
             isSearchResult = hasPostsUiState.isSearchResult
         )
     }
@@ -217,7 +215,6 @@ fun MovieList(
     onAddMovieToCache: (movie: Movie) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
-    state: LazyListState = rememberLazyListState(),
 ) {
     Column(
         modifier = modifier.padding(contentPadding),
@@ -236,7 +233,7 @@ fun MovieList(
                 searchMoviesListPaging.collectAsLazyPagingItems()
             LazyColumn(
                 contentPadding = PaddingValues(all = 0.dp),
-                state = state
+                state = rememberLazyListState()
             ) {
                 items(
                     count = pagingItems.itemCount,
@@ -256,7 +253,7 @@ fun MovieList(
                 trendingMoviesListPaging.collectAsLazyPagingItems()
             LazyColumn(
                 contentPadding = PaddingValues(all = 0.dp),
-                state = state
+                state = rememberLazyListState()
             ) {
                 items(
                     count = pagingItems.itemCount,

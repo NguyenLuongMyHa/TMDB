@@ -38,7 +38,6 @@ fun PortraitTabletGridMovieScreen(
     uiState: HomeUiState,
     onSelectMovie: (Int, Boolean) -> Unit,
     onRefreshMovies: () -> Unit,
-    homeListLazyGridState: LazyGridState,
     modifier: Modifier = Modifier,
     searchInput: String = "",
     onSearchInputChanged: (String) -> Unit,
@@ -61,7 +60,6 @@ fun PortraitTabletGridMovieScreen(
             onSelectMovie = onSelectMovie,
             contentPadding = contentPadding,
             modifier = contentModifier,
-            stateGrid = homeListLazyGridState,
             isSearchResult = hasPostsUiState.isSearchResult
         )
     }
@@ -77,7 +75,7 @@ private fun MovieListGrid(
     onAddMovieToCache: (movie: Movie) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
-    stateGrid: LazyGridState = rememberLazyGridState(),
+//    stateGrid: LazyGridState = rememberLazyGridState(),
 ) {
     Column(
         modifier = modifier.padding(contentPadding),
@@ -98,7 +96,7 @@ private fun MovieListGrid(
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(all = 12.dp),
-                state = stateGrid
+                state = rememberLazyGridState()
             ) {
                 items(
                     count = pagingItems.itemCount,
@@ -120,7 +118,7 @@ private fun MovieListGrid(
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(all = 12.dp),
-                state = stateGrid
+                state = rememberLazyGridState()
             ) {
                 items(
                     count = pagingItems.itemCount,
