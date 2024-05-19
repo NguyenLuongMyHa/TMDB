@@ -78,6 +78,13 @@ class MoviesRepositoryImpl @Inject constructor(private val service: TmdbService,
         }
     }
 
+    suspend fun getSelectedMovie(movieId: Int): MovieEntity? {
+        return database.moviesDao().getSelectedMovie(movieId)
+    }
+    suspend fun updateSelectedMovie(movie: MovieEntity) {
+        database.moviesDao().updateMovie(movie)
+    }
+
     override fun observeSelectedMovies(): Flow<Set<Int>> = selectedMovies
 
     override fun observeMoviesList(): Flow<List<Movie>?> = trendingMoviesList

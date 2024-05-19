@@ -8,8 +8,6 @@ import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -65,7 +63,7 @@ class HomeViewModel @Inject constructor(
      * Search movies and update the UI state accordingly
      */
     fun searchMoviesWithPaging() {
-        if(viewModelState.value.searchInput!="") {
+        if (viewModelState.value.searchInput != "") {
             viewModelState.update { it.copy(isLoading = true) }
 
             val searchKey = viewModelState.value.searchInput
@@ -145,7 +143,7 @@ class HomeViewModel @Inject constructor(
     /**
      * Selects the movie to view more information detail about it.
      */
-    fun selectMovie(movieId: Int) {
+    fun selectMovie2(movieId: Int) {
         interactedWithMovieDetails(movieId)
         viewModelScope.launch {
             moviesRepository.selectMovie(movieId)
@@ -191,6 +189,49 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun selectMovie(movieId: Int) {
+        viewModelScope.launch {
+            moviesRepository.selectMovie(movieId)
+        }
+        //fetch more detail data if movie detail was not cached in memory
+        viewModelScope.launch {
+            val result = moviesRepository.getMovie(movieId)
+            if (result is Result.Success) {
+                moviesRepository.updateSelectedMovie(result.data.toMovieEntity())
+            }
+            val movieCache = moviesRepository.getSelectedMovie(movieId)
+            if (movieCache != null) {
+                viewModelState.update {
+                    when (result) {
+                        is Result.Success -> it.copy(
+                            moviesList = it.moviesList.updateMovieDetail(movieCache.toMovie()),
+                            selectedMovieId = movieId,
+                            isInMovieDetailPage = true,
+                            selectedMovieListId = it.selectedMovieListId.plus(movieId),
+                            isLoading = false
+                        )
+
+                        is Result.Error -> {
+                            val errorMessages = it.errorMessages + ErrorMessage(
+                                id = Random.nextLong(),
+                                messageId = R.string.load_error
+                            )
+                            it.copy(
+                                moviesList = it.moviesList.updateMovieDetail(movieCache.toMovie()),
+                                searchInput = "",
+                                isShowSearchResult = false,
+                                errorMessages = errorMessages, isLoading = false
+                            )
+                        }
+                    }
+                }
+
+                interactedWithMovieDetails(movieId)
+
+            }
+        }
+    }
+
     /**
      * Notify that the user interacted with the list
      */
@@ -220,7 +261,7 @@ class HomeViewModel @Inject constructor(
         viewModelState.update {
             it.copy(searchInput = searchInput)
         }
-        if(searchInput == "") getTrendingMoviesWithPaging()
+        if (searchInput == "") getTrendingMoviesWithPaging()
     }
 
     fun addMovieToMemory(movie: Movie) {

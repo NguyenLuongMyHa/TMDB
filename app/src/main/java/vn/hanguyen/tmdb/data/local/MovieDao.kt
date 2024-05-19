@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface MovieDao {
@@ -22,6 +23,14 @@ interface MovieDao {
         "SELECT * FROM movies"
     )
     fun getAllMovies(): PagingSource<Int, MovieEntity>
+
+    @Query(
+        "SELECT * FROM movies WHERE id = :movieId"
+    )
+    suspend fun getSelectedMovie(movieId: Int): MovieEntity?
+
+    @Update()
+    suspend fun updateMovie(movieEntity: MovieEntity)
 
     /**
      * Clear all data in the Movies table.

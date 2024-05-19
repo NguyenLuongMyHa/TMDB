@@ -1,5 +1,7 @@
 package vn.hanguyen.tmdb.model
 
+import vn.hanguyen.tmdb.data.local.MovieEntity
+
 data class Movie(
     val id: Int,
     val posterPath: String? = null,
@@ -21,7 +23,30 @@ data class Movie(
     val genres: List<Genres>? = null,
     val spokenLanguages: List<SpokenLanguage>? = null,
     val productionCompanies: List<ProductionCompany>? = null,
-)
+) {
+    fun toMovieEntity() :MovieEntity  = MovieEntity(
+        title = title,
+        id = id,
+        posterPath = if (posterPath == null) null else "https://image.tmdb.org/t/p/original$posterPath",
+        releaseDate = releaseDate?:"----",
+        voteAverage = voteAverage,
+        overview = overview,
+        voteCount = voteCount,
+        tagline = tagline,
+        status = status,
+        adult = adult,
+        video = video,
+        revenue = revenue,
+        budget = budget,
+        popularity = popularity,
+        homepage = homepage,
+//            belongsToCollection = belongsToCollection?.toMovieCollection(),
+//            originCountry = originCountry,
+//            genres = genres?.map{ genre -> genre.toGenres()},
+//            spokenLanguages = spokenLanguages?.map { spokenLanguage -> spokenLanguage.toSpokenLanguage() },
+//            productionCompanies = productionCompanies?.map { productionCompany -> productionCompany.toProductionCompany() },
+    )
+}
 data class MovieCollection (
     val id: String,
     val name: String? = null,
