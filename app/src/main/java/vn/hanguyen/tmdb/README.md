@@ -3,17 +3,12 @@
 
 A demo movie android app written in Kotlin and featuring Jetpack Compose for modern, declarative UIs.
 
+# Screenshots
 
+![image](screenshot/screenshot-cover.png)
 
 
 # Features
-
-1. **Offline-first**: The app can be accessed even without an internet connection.
-2. **Pagination**: Efficiently loads large amounts of data to improve the user experience.
-3. **Search functionality**: Allows users to quickly find specific information within the app.
-4. **Auto Sync**: Uses both NetworkConnectivityStream and WorkManager to ensure data is always up-to-date.
-5. **Favorites**: Users can add movies to a favorites list.
-
 
 1. **Movies list screen (Trending and Search):**
 - Add a search field to the top of the screen.
@@ -29,7 +24,7 @@ A demo movie android app written in Kotlin and featuring Jetpack Compose for mod
 - Allow any hyperlinks to be opened.
 - This page should work offline if movie details are opened once before.
 
-3**Adaptive layout support**
+3. **Adaptive layout support**
  https://developer.android.com/jetpack/compose/layouts/adaptive
 
 ## TMDB API
@@ -38,10 +33,6 @@ A demo movie android app written in Kotlin and featuring Jetpack Compose for mod
 
 ## 💡 Architectural Insights
 Layer Architecture 
-
-# Screenshots
-
-![image](screenshot/screenshot-cover.png)
 
 ## Built With 🛠
 - [Kotlin](https://kotlinlang.org/) - First class and official programming language for Android development.
