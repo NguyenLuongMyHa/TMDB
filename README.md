@@ -34,7 +34,7 @@ Layer Architecture
 
 # Screenshots
 
-![image](https://github.com/NguyenLuongMyHa/TMDB/blob/master/screenshot/screenshot-cover.png?raw=true)
+![image](https://github.com/NguyenLuongMyHa/TMDB/blob/master/app/src/main/java/vn/hanguyen/tmdb/screenshot/screenshot-cover.png?raw=true)
 
 ## Built With 🛠
 - [Kotlin](https://kotlinlang.org/) - First class and official programming language for Android development.
@@ -50,3 +50,6 @@ Layer Architecture
 - [Dependency Injection](https://developer.android.com/training/dependency-injection)
   - [Hilt](https://dagger.dev/hilt) - Easier way to incorporate Dagger DI into Android application.
 - [Retrofit](https://square.github.io/retrofit/) - A type-safe HTTP client for Android and Java.
+
+  ## Bugs found 🚫 (I noticed some bugs and trying to figure out the solution)
+  - Couldn't save the paging list state when back from the detail page
